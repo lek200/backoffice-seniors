@@ -83,6 +83,25 @@
   .bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 20px;}
   .bar-fill{height:100%;background:var(--honey);border-radius:99px;width:0%;transition:width .3s;}
 
+  /* RECHERCHE */
+  .search-row{position:relative;margin-bottom:14px;}
+  .search-row input{padding-left:42px;}
+  .search-row svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:var(--ink-soft);fill:none;stroke-width:2;pointer-events:none;}
+
+  /* LECTEUR DE COURS EN SLIDES */
+  .slide-head{display:flex;align-items:center;gap:14px;margin:6px 0 16px;}
+  .icon-tile{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:24px;font-weight:700;color:#fff;flex-shrink:0;}
+  .slide-card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:24px;min-height:280px;animation:fadeSlide .3s ease;}
+  @keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .slide-card h3{font-size:20px;margin-bottom:14px;}
+  .slide-card pre{font-size:17px;line-height:1.6;}
+  .slide-nav{display:flex;gap:10px;margin-top:16px;}
+  .slide-nav .btn{margin-top:0;}
+  .pct{font-size:13px;font-weight:600;color:var(--ink-soft);text-align:right;margin-bottom:6px;}
+  .slide-situation{border-left:4px solid var(--honey);}
+  .fin-score{font-size:44px;font-weight:700;color:var(--blue);margin:12px 0 4px;}
+
   /* DIPLÔME PRESTIGE */
   .diplome{
     background:#FFFEF9;
@@ -180,6 +199,7 @@
           </select>
           <button class="btn" onclick="createClient()">Enregistrer</button>
         </div>
+        <div class="search-row"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg><input id="clients-search" placeholder="Rechercher un client (nom, téléphone, appareil)..." oninput="renderClientsList()"></div>
         <div id="clients-list"></div>
       </div>
 
@@ -194,6 +214,7 @@
       <div id="bilan-setup">
         <h2>Nouveau bilan numérique</h2>
         <label>Pour quel client ?</label>
+        <div class="search-row"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg><input id="bilan-search" placeholder="Filtrer les clients..." oninput="fillBilanSelect()"></div>
         <select id="bilan-client"></select>
         <button class="btn" onclick="startBilan()">Commencer le bilan</button>
       </div>
@@ -221,28 +242,36 @@
     <!-- ===== TAB COURS ===== -->
     <div id="tab-cours" class="hidden">
       <div id="cours-list-view">
-        <h2>Bibliothèque de cours</h2>
-        <p class="muted" style="margin-bottom:12px;">Tous les cours restent accessibles, même sur les points forts : un élève peut toujours revoir un domaine qu'il maîtrise.</p>
+        <h2>Cours</h2>
+        <div class="search-row"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg><input id="cours-search" placeholder="Rechercher un cours (Excel, imprimante, arnaque...)" oninput="renderCoursList()"></div>
         <label>Domaine</label>
-        <select id="cours-domaine" onchange="renderCoursList()">
-          <option value="">Tous les domaines</option>
-          <option value="Prise en main">Prise en main</option>
-          <option value="Internet au quotidien">Internet au quotidien</option>
-          <option value="E-mails et démarches">E-mails et démarches</option>
-          <option value="Sécurité et confiance">Sécurité et confiance</option>
-        </select>
+        <select id="cours-domaine" onchange="renderCoursList()"></select>
         <div id="cours-list" style="margin-top:16px;"></div>
       </div>
-      <div id="cours-detail-view" class="hidden">
-        <button class="back-link" onclick="backToCours()">← Retour aux cours</button>
-        <div id="cours-detail"></div>
+      <div id="cours-player-view" class="hidden">
+        <button class="back-link" onclick="backToCours()">← Quitter le cours</button>
+        <div class="pct" id="sl-pct"></div>
+        <div class="bar"><div class="bar-fill" id="sl-fill"></div></div>
+        <div class="slide-head">
+          <div class="icon-tile" id="sl-tile"></div>
+          <div><span class="q-domain" id="sl-domaine"></span><h2 id="sl-titre" style="margin-top:8px;font-size:19px;"></h2></div>
+        </div>
+        <div id="sl-body"></div>
+        <div class="slide-nav">
+          <button class="btn ghost" id="sl-prev" onclick="slidePrev()">Précédent</button>
+          <button class="btn" id="sl-next" onclick="slideNext()">Suivant</button>
+        </div>
       </div>
     </div>
 
     <!-- ===== TAB BIBLIOTHÈQUE ===== -->
     <div id="tab-biblio" class="hidden">
+      <h2>Bibliothèque</h2>
+      <p class="muted" style="margin-bottom:12px;">Tes contenus de travail : argumentaires, scripts d'appel, offres, notes personnelles. Toujours sous la main, même en clientèle. Appuie sur un titre pour l'ouvrir.</p>
+      <div class="search-row"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg><input id="biblio-search" placeholder="Rechercher dans la bibliothèque..." oninput="renderBiblio()"></div>
       <label>Catégorie</label>
-      <select id="biblio-cat" onchange="loadBiblio()">
+      <select id="biblio-cat" onchange="renderBiblio()">
+        <option value="">Toutes les catégories</option>
         <option value="anti_objections">Anti-objections</option>
         <option value="scripts_b2b">Scripts B2B</option>
         <option value="modules">Modules de cours</option>
@@ -389,9 +418,15 @@ async function loadClients(){
   const { data, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
   if(error){ toast("Erreur de chargement clients"); return; }
   clientsCache = data;
+  renderClientsList();
+}
+function renderClientsList(){
   const el = document.getElementById('clients-list');
-  if(!data.length){ el.innerHTML = '<p class="muted">Aucun client pour le moment. Ajoute le premier.</p>'; return; }
-  el.innerHTML = data.map(c=>
+  if(!clientsCache.length){ el.innerHTML = '<p class="muted">Aucun client pour le moment. Ajoute le premier.</p>'; return; }
+  const q = (document.getElementById('clients-search').value||'').toLowerCase();
+  const list = q ? clientsCache.filter(c=>(c.prenom+' '+c.nom+' '+(c.telephone||'')+' '+(c.appareil||'')).toLowerCase().includes(q)) : clientsCache;
+  if(!list.length){ el.innerHTML = '<p class="muted">Aucun client ne correspond à cette recherche.</p>'; return; }
+  el.innerHTML = list.map(c=>
     '<div class="card click" onclick="openClient(\''+c.id+'\')">'
     +'<div class="row"><h3>'+esc(c.prenom)+' '+esc(c.nom)+'</h3>'
     +'<span class="badge '+c.statut+'">'+c.statut+'</span></div>'
@@ -425,9 +460,11 @@ async function openClient(id){
   document.getElementById('clients-list-view').classList.add('hidden');
   document.getElementById('client-detail-view').classList.remove('hidden');
 
-  const [{data:bilans},{data:routes}] = await Promise.all([
+  if(!coursCache.length) await loadCoursCache();
+  const [{data:bilans},{data:routes},{data:progs}] = await Promise.all([
     sb.from('bilans').select('*').eq('client_id',id).order('created_at',{ascending:false}),
-    sb.from('feuilles_route').select('*').eq('client_id',id).order('created_at',{ascending:false})
+    sb.from('feuilles_route').select('*').eq('client_id',id).order('created_at',{ascending:false}),
+    sb.from('progressions').select('*').eq('client_id',id).order('created_at',{ascending:false})
   ]);
 
   let html = '<div class="card"><div class="row"><h2 style="margin:0;">'+esc(c.prenom)+' '+esc(c.nom)+'</h2>'
@@ -483,6 +520,33 @@ async function openClient(id){
       +'</div>').join('');
   } else {
     html += '<p class="muted">Aucune feuille de route générée.</p>';
+  }
+
+  // Parcours et progression
+  html += '<h3 style="margin:24px 0 10px;">Parcours et progression</h3>';
+  if(progs && progs.length){
+    html += progs.map(p=>{
+      const cr = coursCache.find(k=>k.id===p.cours_id);
+      return '<div class="card"><div class="row"><h3 style="font-size:15px;">'+esc(cr ? cr.titre : 'Cours supprimé')+'</h3>'
+        +(p.total_quiz ? '<span class="badge fort">Quiz : '+p.score_quiz+' / '+p.total_quiz+'</span>' : '<span class="badge termine">Terminé</span>')
+        +'</div><p class="muted">'+new Date(p.created_at).toLocaleDateString('fr-FR')+(cr ? ' · '+esc(cr.domaine) : '')+'</p></div>';
+    }).join('');
+
+    // Diplômes débloqués : tous les cours publiés d'un domaine terminés
+    const doneIds = new Set(progs.map(p=>p.cours_id));
+    const domainesPub = [...new Set(coursCache.filter(k=>k.statut==='publie').map(k=>k.domaine))];
+    let dipHtml = '';
+    domainesPub.forEach(dom=>{
+      const pubs = coursCache.filter(k=>k.domaine===dom && k.statut==='publie');
+      if(pubs.length && pubs.every(k=>doneIds.has(k.id))){
+        dipHtml += '<div class="card" style="border-left:4px solid var(--green);"><div class="row"><h3 style="font-size:15px;">Diplôme débloqué : '+esc(dom)+'</h3>'
+          +'<button class="btn-sm" data-name="'+esc(c.prenom+' '+c.nom)+'" data-dom="'+esc(dom)+'" onclick="prepDiplome(this)">Préparer le diplôme</button></div>'
+          +'<p class="muted">Tous les cours publiés du domaine sont terminés.</p></div>';
+      }
+    });
+    if(dipHtml) html += '<h3 style="margin:20px 0 10px;">Diplômes</h3>'+dipHtml;
+  } else {
+    html += '<p class="muted">Aucun cours terminé pour l\'instant. La progression s\'enregistre sur le dernier écran de chaque cours, dans l\'onglet Cours.</p>';
   }
 
   document.getElementById('client-detail').innerHTML = html;
@@ -549,9 +613,11 @@ let bFlat=[], bIdx=0, bScores=[], bClientId=null;
 DOMAINS.forEach((d,di)=>d.questions.forEach((q,qi)=>bFlat.push({di,qi,q,domain:d.name})));
 
 function fillBilanSelect(){
+  const q = (document.getElementById('bilan-search').value||'').toLowerCase();
+  const list = q ? clientsCache.filter(c=>(c.prenom+' '+c.nom).toLowerCase().includes(q)) : clientsCache;
   const sel = document.getElementById('bilan-client');
-  sel.innerHTML = clientsCache.map(c=>'<option value="'+c.id+'">'+esc(c.prenom)+' '+esc(c.nom)+'</option>').join('')
-    || '<option value="">Ajoute d\'abord un client</option>';
+  sel.innerHTML = list.map(c=>'<option value="'+c.id+'">'+esc(c.prenom)+' '+esc(c.nom)+'</option>').join('')
+    || '<option value="">Aucun client trouvé</option>';
 }
 function startBilan(){
   bClientId = document.getElementById('bilan-client').value;
@@ -608,12 +674,17 @@ async function saveBilan(){
 }
 
 // ============================================================
-// COURS : bibliothèque, recommandations, quiz
+// COURS : catalogue, lecteur en slides, quiz, progression
 // ============================================================
-let coursCache = [], currentQuiz = [];
+let coursCache = [], slides = [], slideIdx = 0, currentCours = null, quizResults = {};
 const NIVEAUX = {1:'Découverte', 2:'Pratique', 3:'Perfectionnement'};
 const NIVEAU_CLS = {1:'decouvrir', 2:'progres', 3:'fort'};
+const TILE_COLORS = ['#33567F','#4E7A5A','#8A6112','#8C4A3E','#5B4A7F','#3E7A8C','#7F4A33','#556B2F'];
 
+function tileColor(name){
+  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
+  return TILE_COLORS[h%TILE_COLORS.length];
+}
 async function loadCoursCache(){
   const { data, error } = await sb.from('cours').select('*').order('domaine').order('niveau');
   if(!error) coursCache = data || [];
@@ -623,97 +694,225 @@ function nivReco(score){ return score<=3 ? 1 : (score<=6 ? 2 : 3); }
 function renderCoursList(){
   const el = document.getElementById('cours-list');
   if(!coursCache.length){
-    el.innerHTML = '<p class="muted">Aucun cours en base. Exécute le fichier cours.sql dans Supabase.</p>';
-    loadCoursCache().then(()=>{ if(coursCache.length) renderCoursList(); });
+    el.innerHTML = '<p class="muted">Chargement des cours...</p>';
+    loadCoursCache().then(()=>{
+      if(coursCache.length) renderCoursList();
+      else el.innerHTML = '<p class="muted">Aucun cours en base. Exécute cours.sql et extension.sql dans Supabase.</p>';
+    });
     return;
   }
-  const filtre = document.getElementById('cours-domaine').value;
-  const list = filtre ? coursCache.filter(c=>c.domaine===filtre) : coursCache;
+  const sel = document.getElementById('cours-domaine');
+  const current = sel.value;
+  const domaines = [...new Set(coursCache.map(c=>c.domaine))];
+  sel.innerHTML = '<option value="">Tous les domaines ('+coursCache.length+' cours)</option>'
+    + domaines.map(d=>'<option value="'+esc(d)+'"'+(d===current?' selected':'')+'>'+esc(d)+'</option>').join('');
+
+  const q = (document.getElementById('cours-search').value||'').toLowerCase();
+  let list = coursCache;
+  if(sel.value) list = list.filter(c=>c.domaine===sel.value);
+  if(q) list = list.filter(c=>(c.titre+' '+c.domaine+' '+(c.corps||'')).toLowerCase().includes(q));
+  if(!list.length){ el.innerHTML = '<p class="muted">Aucun cours ne correspond à cette recherche.</p>'; return; }
+
   el.innerHTML = list.map(c=>
     '<div class="card click" onclick="openCoursById(\''+c.id+'\')">'
-    +'<div class="row"><h3>'+esc(c.titre)+'</h3>'
-    +'<span class="badge '+NIVEAU_CLS[c.niveau]+'">'+NIVEAUX[c.niveau]+'</span></div>'
+    +'<div class="row"><h3 style="font-size:16px;">'+esc(c.titre)+'</h3><div>'
+    +(c.statut!=='publie' ? '<span class="badge prospect">À générer</span> ' : '')
+    +'<span class="badge '+NIVEAU_CLS[c.niveau]+'">'+NIVEAUX[c.niveau]+'</span></div></div>'
     +'<p class="muted">'+esc(c.domaine)+'</p></div>').join('');
 }
 function backToCours(){
-  document.getElementById('cours-detail-view').classList.add('hidden');
+  document.getElementById('cours-player-view').classList.add('hidden');
   document.getElementById('cours-list-view').classList.remove('hidden');
+  renderCoursList();
+}
+function prettyTitle(t){
+  t = t.trim();
+  return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
+}
+function buildSlides(c){
+  const out = [];
+  (c.corps||'').split(/\n\s*\n/).forEach(b=>{
+    b = b.trim(); if(!b) return;
+    const lines = b.split('\n');
+    const m = lines[0].match(/^([^:a-z]{3,70}?)\s*:\s*(.*)$/);
+    if(m){
+      out.push({type:'texte', titre:prettyTitle(m[1]), contenu:((m[2]||'').trim() ? m[2].trim()+'\n' : '')+lines.slice(1).join('\n')});
+    } else {
+      out.push({type:'texte', titre:'À retenir', contenu:b});
+    }
+  });
+  if(c.situation) out.push({type:'situation', contenu:c.situation.replace(/^MISE EN SITUATION\s*:\s*/,'')});
+  (c.quiz||[]).forEach((item,i)=> out.push({type:'quiz', item, num:i+1}));
+  out.push({type:'fin'});
+  return out;
 }
 function openCoursById(id){
   const c = coursCache.find(x=>x.id===id);
   if(!c) return;
+  currentCours = c; quizResults = {};
+  showTab('cours');
   document.getElementById('cours-list-view').classList.add('hidden');
-  document.getElementById('cours-detail-view').classList.remove('hidden');
-  currentQuiz = c.quiz || [];
+  document.getElementById('cours-player-view').classList.remove('hidden');
+  const tile = document.getElementById('sl-tile');
+  tile.style.background = tileColor(c.domaine);
+  tile.textContent = c.domaine.charAt(0);
+  document.getElementById('sl-domaine').textContent = c.domaine+' · '+NIVEAUX[c.niveau];
+  document.getElementById('sl-titre').textContent = c.titre;
+  const nav = document.querySelector('#cours-player-view .slide-nav');
 
-  let html = '<span class="badge '+NIVEAU_CLS[c.niveau]+'">'+NIVEAUX[c.niveau]+'</span>'
-    +' <span class="q-domain">'+esc(c.domaine)+'</span>'
-    +'<h2 style="margin:12px 0;">'+esc(c.titre)+'</h2>'
-    +'<div class="card"><pre>'+esc(c.corps)+'</pre></div>';
-
-  if(c.situation){
-    html += '<h3 style="margin:20px 0 10px;">Mise en situation</h3>'
-      +'<div class="card" style="border-left:4px solid var(--honey);"><pre>'+esc(c.situation)+'</pre></div>';
+  if(c.statut!=='publie'){
+    document.getElementById('sl-pct').textContent = '';
+    document.getElementById('sl-fill').style.width = '0%';
+    document.getElementById('sl-body').innerHTML =
+      '<div class="slide-card"><h3>Fiche du catalogue, cours pas encore rédigé</h3>'
+      +'<pre>'+esc(c.corps||'')+'</pre>'
+      +'<p class="muted" style="margin-top:14px;">Deux façons de le créer : le bouton ci-dessous (nécessite l\'Edge Function déployée et des crédits API), ou demande à Claude de rédiger ce cours et colle le SQL fourni dans Supabase.</p>'
+      +'<button class="btn" id="btn-gen-cours" onclick="generateCours(\''+c.id+'\')">Générer ce cours (IA)</button></div>';
+    nav.classList.add('hidden');
+    window.scrollTo({top:0});
+    return;
   }
-  if(currentQuiz.length){
-    html += '<h3 style="margin:20px 0 10px;">Quiz bienveillant</h3>';
-    html += currentQuiz.map((item,qi)=>
-      '<div class="card"><p style="font-weight:700;margin-bottom:12px;">'+(qi+1)+'. '+esc(item.q)+'</p>'
-      +'<div class="answers" id="qz-'+qi+'">'
-      + item.options.map((o,oi)=>
-        '<button class="answer" onclick="quizAnswer('+qi+','+oi+')"><span class="dot"></span><span>'+esc(o)+'</span></button>'
-      ).join('')
-      +'</div><p class="muted" id="fb-'+qi+'" style="margin-top:10px;"></p></div>'
-    ).join('');
-  }
-  document.getElementById('cours-detail').innerHTML = html;
+  nav.classList.remove('hidden');
+  slides = buildSlides(c);
+  slideIdx = 0;
+  renderSlide();
   window.scrollTo({top:0});
 }
-function quizAnswer(qi, oi){
-  const item = currentQuiz[qi];
-  const zone = document.getElementById('qz-'+qi);
-  const btns = zone.querySelectorAll('.answer');
-  btns.forEach(b=>{ b.disabled = true; b.style.cursor='default'; });
-  const fb = document.getElementById('fb-'+qi);
-  if(oi === item.bonne){
-    btns[oi].style.borderColor = 'var(--green)';
-    btns[oi].style.background = 'var(--green-soft)';
-    fb.textContent = item.bravo || 'Bonne réponse !';
-    fb.style.color = 'var(--green)';
+function renderSlide(){
+  const s = slides[slideIdx], total = slides.length;
+  const pct = Math.round(slideIdx/(total-1)*100);
+  document.getElementById('sl-pct').textContent = pct+'% · écran '+(slideIdx+1)+' sur '+total;
+  document.getElementById('sl-fill').style.width = pct+'%';
+  const body = document.getElementById('sl-body');
+
+  if(s.type==='texte'){
+    body.innerHTML = '<div class="slide-card"><h3>'+esc(s.titre)+'</h3><pre>'+esc(s.contenu)+'</pre></div>';
+  } else if(s.type==='situation'){
+    body.innerHTML = '<div class="slide-card slide-situation"><h3>Mise en situation</h3><pre>'+esc(s.contenu)+'</pre></div>';
+  } else if(s.type==='quiz'){
+    const it = s.item, prev = quizResults[s.num];
+    body.innerHTML = '<div class="slide-card"><h3>Question '+s.num+'</h3>'
+      +'<p style="font-weight:600;margin-bottom:14px;font-size:18px;">'+esc(it.q)+'</p>'
+      +'<div class="answers" id="sl-qz">'
+      + it.options.map((o,oi)=>'<button class="answer" onclick="slideQuizAnswer('+oi+')"><span class="dot"></span><span>'+esc(o)+'</span></button>').join('')
+      +'</div><p class="muted" id="sl-fb" style="margin-top:10px;"></p></div>';
+    if(prev !== undefined) paintQuiz(prev, it);
   } else {
-    btns[oi].style.borderColor = '#D9A79F';
-    btns[oi].style.background = 'var(--red-soft)';
-    btns[item.bonne].style.borderColor = 'var(--green)';
-    btns[item.bonne].style.background = 'var(--green-soft)';
-    fb.textContent = item.aide || 'Pas tout à fait, regardez la bonne réponse en vert.';
-    fb.style.color = 'var(--red-ink)';
+    const totalQ = (currentCours.quiz||[]).length;
+    const done = Object.keys(quizResults).length;
+    const good = Object.values(quizResults).filter(r=>r.correct).length;
+    body.innerHTML = '<div class="slide-card" style="text-align:center;"><h3>Cours terminé, bravo !</h3>'
+      +(totalQ
+        ? '<p class="fin-score">'+good+' / '+totalQ+'</p><p class="muted">bonnes réponses au quiz'+(done<totalQ ? ' ('+(totalQ-done)+' sans réponse)' : '')+'</p>'
+        : '<p class="muted">Ce cours ne comporte pas de quiz.</p>')
+      +'<label style="text-align:left;">Enregistrer la progression pour</label>'
+      +'<select id="prog-client">'+clientsCache.map(c=>'<option value="'+c.id+'">'+esc(c.prenom)+' '+esc(c.nom)+'</option>').join('')+'</select>'
+      +'<button class="btn" onclick="saveProgression('+good+','+totalQ+')">Enregistrer la progression</button></div>';
+  }
+  document.getElementById('sl-prev').style.visibility = slideIdx===0 ? 'hidden' : 'visible';
+  document.getElementById('sl-next').textContent = slideIdx===total-1 ? 'Revenir au début' : 'Suivant';
+}
+function paintQuiz(prev, it){
+  const btns = document.querySelectorAll('#sl-qz .answer');
+  btns.forEach(b=>{ b.disabled = true; b.style.cursor = 'default'; });
+  btns[prev.choice].style.borderColor = prev.correct ? 'var(--green)' : '#D9A79F';
+  btns[prev.choice].style.background = prev.correct ? 'var(--green-soft)' : 'var(--red-soft)';
+  btns[it.bonne].style.borderColor = 'var(--green)';
+  btns[it.bonne].style.background = 'var(--green-soft)';
+  const fb = document.getElementById('sl-fb');
+  fb.textContent = prev.correct ? (it.bravo||'Bonne réponse !') : (it.aide||'Regardez la bonne réponse en vert.');
+  fb.style.color = prev.correct ? 'var(--green)' : 'var(--red-ink)';
+}
+function slideQuizAnswer(oi){
+  const s = slides[slideIdx];
+  if(s.type!=='quiz' || quizResults[s.num]!==undefined) return;
+  quizResults[s.num] = {choice:oi, correct: oi===s.item.bonne};
+  paintQuiz(quizResults[s.num], s.item);
+}
+function slidePrev(){ if(slideIdx>0){ slideIdx--; renderSlide(); window.scrollTo({top:0}); } }
+function slideNext(){
+  if(slideIdx<slides.length-1){ slideIdx++; } else { slideIdx=0; }
+  renderSlide(); window.scrollTo({top:0});
+}
+async function saveProgression(good, totalQ){
+  const cid = document.getElementById('prog-client').value;
+  if(!cid){ toast('Ajoute d\'abord un client'); return; }
+  const { error } = await sb.from('progressions').insert({
+    client_id: cid, cours_id: currentCours.id, score_quiz: good, total_quiz: totalQ
+  });
+  if(error){ toast('Erreur : la table progressions existe ? Exécute extension.sql'); return; }
+  toast('Progression enregistrée');
+}
+async function generateCours(id){
+  const c = coursCache.find(x=>x.id===id);
+  if(!c) return;
+  const btn = document.getElementById('btn-gen-cours');
+  btn.disabled = true; btn.textContent = 'Génération en cours (30 à 60 s)...';
+  try{
+    const { data: session } = await sb.auth.getSession();
+    const res = await fetch(CONFIG.SUPABASE_URL+'/functions/v1/'+CONFIG.EDGE_FUNCTION, {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'authorization':'Bearer '+session.session.access_token },
+      body: JSON.stringify({ type:'cours', titre:c.titre, domaine:c.domaine, niveau:c.niveau, description:c.corps })
+    });
+    const out = await res.json();
+    if(out.error) throw new Error(out.error);
+    const { error } = await sb.from('cours').update({
+      corps: out.corps, quiz: out.quiz, situation: out.situation, statut: 'publie'
+    }).eq('id', id);
+    if(error) throw error;
+    toast('Cours généré et publié');
+    await loadCoursCache();
+    openCoursById(id);
+  }catch(e){
+    toast('Génération impossible : '+e.message);
+    btn.disabled = false; btn.textContent = 'Générer ce cours (IA)';
   }
 }
-function openCoursFromFiche(id){
-  showTab('cours');
-  openCoursById(id);
-}
+function openCoursFromFiche(id){ openCoursById(id); }
 
 // ============================================================
 // BIBLIOTHÈQUE
 // ============================================================
+let biblioCache = [];
 async function loadBiblio(){
-  const cat = document.getElementById('biblio-cat').value;
-  const { data, error } = await sb.from('contenus').select('*').eq('categorie',cat).order('created_at');
+  const { data, error } = await sb.from('contenus').select('*').order('created_at');
   if(error){ toast("Erreur de chargement"); return; }
+  biblioCache = data || [];
+  renderBiblio();
+}
+function renderBiblio(){
+  const cat = document.getElementById('biblio-cat').value;
+  const q = (document.getElementById('biblio-search').value||'').toLowerCase();
+  let list = biblioCache;
+  if(cat) list = list.filter(c=>c.categorie===cat);
+  if(q) list = list.filter(c=>(c.titre+' '+c.corps).toLowerCase().includes(q));
   const el = document.getElementById('biblio-list');
-  if(!data.length){ el.innerHTML='<p class="muted">Rien dans cette catégorie pour le moment.</p>'; return; }
-  el.innerHTML = data.map(c=>
-    '<div class="card"><h3>'+esc(c.titre)+'</h3><pre style="margin-top:8px;">'+esc(c.corps)+'</pre></div>').join('');
+  if(!list.length){
+    el.innerHTML = '<p class="muted">Rien ici pour le moment. La bibliothèque est ton classeur commercial : demande la Partie 2 à Claude (tarifs, scripts B2B, parrainage) et colle chaque contenu ici, ou ajoute tes propres notes.</p>';
+    return;
+  }
+  el.innerHTML = list.map(c=>
+    '<div class="card"><div class="row" style="cursor:pointer;" onclick="this.parentElement.querySelector(\'pre\').classList.toggle(\'hidden\')">'
+    +'<h3 style="font-size:16px;">'+esc(c.titre)+'</h3><span class="badge termine">'+esc(c.categorie)+'</span></div>'
+    +'<pre class="hidden" style="margin-top:10px;">'+esc(c.corps)+'</pre>'
+    +'<button class="back-link" data-id="'+c.id+'" onclick="deleteContent(this)" style="margin-top:6px;">Supprimer</button></div>').join('');
+}
+async function deleteContent(el){
+  if(!confirm('Supprimer définitivement ce contenu ?')) return;
+  const { error } = await sb.from('contenus').delete().eq('id', el.dataset.id);
+  if(error){ toast('Erreur à la suppression'); return; }
+  toast('Contenu supprimé');
+  loadBiblio();
 }
 function toggleNewContent(){ document.getElementById('new-content-form').classList.toggle('hidden'); }
 async function createContent(){
   const titre = document.getElementById('ct-titre').value.trim();
   const corps = document.getElementById('ct-corps').value.trim();
+  const cat = document.getElementById('biblio-cat').value;
+  if(!cat){ toast("Choisis d'abord une catégorie précise"); return; }
   if(!titre || !corps){ toast("Titre et contenu obligatoires"); return; }
-  const { error } = await sb.from('contenus').insert({
-    categorie: document.getElementById('biblio-cat').value, titre, corps
-  });
+  const { error } = await sb.from('contenus').insert({ categorie: cat, titre, corps });
   if(error){ toast("Erreur"); return; }
   toast("Contenu ajouté");
   document.getElementById('ct-titre').value=''; document.getElementById('ct-corps').value='';
@@ -724,6 +923,13 @@ async function createContent(){
 // ============================================================
 // DIPLÔME
 // ============================================================
+function prepDiplome(el){
+  document.getElementById('d-name').value = el.dataset.name;
+  document.getElementById('d-module').value = 'Parcours '+el.dataset.dom;
+  showTab('diplome');
+  renderDiplome();
+  window.scrollTo({top:0});
+}
 function renderDiplome(){
   document.getElementById('dp-name').textContent = document.getElementById('d-name').value || 'Prénom Nom';
   document.getElementById('dp-module').textContent = document.getElementById('d-module').value || 'Titre du module';
