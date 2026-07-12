@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back-office — Cours informatique seniors</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+  :root{
+    --ink:#22303C; --ink-soft:#5B6B7A; --bg:#FBFAF7; --card:#FFFFFF;
+    --line:#E4E1D8; --blue:#33567F; --blue-deep:#24405F;
+    --honey:#D99A2B; --honey-soft:#F7EBD3;
+    --green:#4E7A5A; --green-soft:#E6F0E8; --red-soft:#F4E4E1; --red-ink:#8C4A3E;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:var(--bg);color:var(--ink);font-size:16px;line-height:1.55;min-height:100vh;}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 80px;}
+  h1{font-size:26px;font-weight:700;letter-spacing:-.01em;}
+  h2{font-size:21px;font-weight:700;margin-bottom:14px;}
+  h3{font-size:17px;font-weight:700;}
+  .muted{color:var(--ink-soft);font-size:14px;}
+
+  /* NAV */
+  nav{display:flex;gap:4px;background:var(--card);border:1.5px solid var(--line);
+    border-radius:14px;padding:5px;margin:18px 0 24px;overflow-x:auto;}
+  nav button{flex:1;padding:11px 8px;font-size:14px;font-weight:600;font-family:inherit;
+    border:none;background:transparent;color:var(--ink-soft);border-radius:10px;cursor:pointer;white-space:nowrap;}
+  nav button.on{background:var(--blue);color:#fff;}
+
+  /* FORMS */
+  label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin:12px 0 5px;}
+  input,select,textarea{width:100%;padding:13px;font-size:16px;font-family:inherit;
+    border:1.5px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);}
+  textarea{min-height:90px;resize:vertical;}
+  input:focus,select:focus,textarea:focus{outline:3px solid var(--honey);outline-offset:1px;}
+  .btn{display:block;width:100%;padding:15px;font-size:16px;font-weight:600;font-family:inherit;
+    border:none;border-radius:12px;cursor:pointer;background:var(--blue);color:#fff;margin-top:16px;}
+  .btn:hover{background:var(--blue-deep);}
+  .btn.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--line);}
+  .btn.ghost:hover{background:#F2F0EA;}
+  .btn:disabled{opacity:.5;cursor:wait;}
+  .btn-sm{padding:9px 14px;font-size:14px;font-weight:600;font-family:inherit;border:none;
+    border-radius:9px;cursor:pointer;background:var(--blue);color:#fff;}
+  .btn-sm.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--line);}
+
+  /* CARDS */
+  .card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;
+    padding:18px;margin-bottom:12px;}
+  .card.click{cursor:pointer;}
+  .card.click:hover{border-color:var(--blue);}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 11px;border-radius:99px;}
+  .badge.prospect{background:var(--honey-soft);color:#8A6112;}
+  .badge.actif{background:var(--green-soft);color:var(--green);}
+  .badge.termine{background:#E9EEF5;color:var(--blue);}
+  .badge.decouvrir{background:var(--red-soft);color:var(--red-ink);}
+  .badge.progres{background:var(--honey-soft);color:#8A6112;}
+  .badge.fort{background:var(--green-soft);color:var(--green);}
+  pre{white-space:pre-wrap;font-family:inherit;font-size:15px;line-height:1.6;}
+  .back-link{background:none;border:none;color:var(--ink-soft);font-size:14px;font-family:inherit;
+    cursor:pointer;padding:6px 0;text-decoration:underline;margin-bottom:12px;display:inline-block;}
+  .hidden{display:none!important;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);
+    color:#fff;padding:12px 22px;border-radius:99px;font-size:14px;font-weight:600;
+    opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;}
+  .toast.show{opacity:1;}
+
+  /* QUIZ */
+  .q-domain{display:inline-block;font-size:13px;font-weight:600;color:var(--blue);
+    background:#E9EEF5;padding:5px 13px;border-radius:99px;margin-bottom:12px;}
+  .q-text{font-size:21px;font-weight:700;line-height:1.35;margin-bottom:20px;}
+  .answers{display:flex;flex-direction:column;gap:10px;}
+  .answer{padding:17px;font-size:16px;font-weight:500;text-align:left;background:var(--card);
+    border:1.5px solid var(--line);border-radius:12px;cursor:pointer;font-family:inherit;
+    color:var(--ink);display:flex;align-items:center;gap:12px;min-height:56px;}
+  .answer:hover{border-color:var(--blue);background:#F7F9FC;}
+  .answer .dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid var(--line);}
+  .answer.a0 .dot{background:var(--red-soft);border-color:#D9A79F;}
+  .answer.a1 .dot{background:var(--honey-soft);border-color:var(--honey);}
+  .answer.a2 .dot{background:var(--green-soft);border-color:var(--green);}
+  .bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 20px;}
+  .bar-fill{height:100%;background:var(--honey);border-radius:99px;width:0%;transition:width .3s;}
+
+  /* DIPLÔME */
+  .diplome{background:#fff;border:3px double var(--blue);border-radius:4px;padding:48px 40px;
+    text-align:center;margin-top:20px;}
+  .diplome .d-eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--honey);font-weight:600;margin-bottom:18px;}
+  .diplome .d-title{font-size:30px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px;}
+  .diplome .d-sub{color:var(--ink-soft);font-size:15px;margin-bottom:26px;}
+  .diplome .d-name{font-size:34px;font-weight:700;color:var(--blue);margin:10px 0;}
+  .diplome .d-module{font-size:18px;margin:14px 0 26px;}
+  .diplome .d-module strong{color:var(--blue);}
+  .diplome .d-line{width:80px;height:2px;background:var(--honey);margin:0 auto 22px;}
+  .diplome .d-footer{display:flex;justify-content:space-between;margin-top:36px;
+    font-size:13px;color:var(--ink-soft);}
+  .diplome .d-sign{border-top:1.5px solid var(--line);padding-top:8px;min-width:150px;}
+  @media print{
+    body *{visibility:hidden;}
+    .diplome, .diplome *{visibility:visible;}
+    .diplome{position:fixed;inset:0;margin:0;border-radius:0;display:flex;
+      flex-direction:column;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ LOGIN ============ -->
+  <section id="v-login">
+    <h1 style="margin-top:40px;">Back-office</h1>
+    <p class="muted">Cours d'informatique pour seniors</p>
+    <div class="card" style="margin-top:24px;">
+      <label>E-mail</label>
+      <input type="email" id="login-email" autocomplete="email">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pass" autocomplete="current-password">
+      <button class="btn" onclick="login()">Se connecter</button>
+      <p class="muted" id="login-err" style="margin-top:10px;color:var(--red-ink);"></p>
+    </div>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <section id="v-app" class="hidden">
+    <div class="row">
+      <h1>Back-office</h1>
+      <button class="btn-sm ghost" onclick="logout()">Déconnexion</button>
+    </div>
+    <nav>
+      <button data-tab="clients" class="on" onclick="showTab('clients')">Clients</button>
+      <button data-tab="bilan" onclick="showTab('bilan')">Bilan</button>
+      <button data-tab="biblio" onclick="showTab('biblio')">Bibliothèque</button>
+      <button data-tab="diplome" onclick="showTab('diplome')">Diplôme</button>
+    </nav>
+
+    <!-- ===== TAB CLIENTS ===== -->
+    <div id="tab-clients">
+      <div id="clients-list-view">
+        <button class="btn ghost" style="margin:0 0 16px;" onclick="toggleNewClient()">Ajouter un client</button>
+        <div class="card hidden" id="new-client-form">
+          <label>Prénom (obligatoire)</label><input id="nc-prenom">
+          <label>Nom</label><input id="nc-nom">
+          <label>Téléphone</label><input id="nc-tel" type="tel">
+          <label>Appareil principal</label><input id="nc-appareil" placeholder="Ex : tablette Samsung">
+          <label>Statut</label>
+          <select id="nc-statut">
+            <option value="prospect">Prospect</option>
+            <option value="actif">Actif</option>
+            <option value="termine">Terminé</option>
+          </select>
+          <button class="btn" onclick="createClient()">Enregistrer</button>
+        </div>
+        <div id="clients-list"></div>
+      </div>
+
+      <div id="client-detail-view" class="hidden">
+        <button class="back-link" onclick="backToClients()">← Retour aux clients</button>
+        <div id="client-detail"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB BILAN ===== -->
+    <div id="tab-bilan" class="hidden">
+      <div id="bilan-setup">
+        <h2>Nouveau bilan numérique</h2>
+        <label>Pour quel client ?</label>
+        <select id="bilan-client"></select>
+        <button class="btn" onclick="startBilan()">Commencer le bilan</button>
+      </div>
+      <div id="bilan-quiz" class="hidden">
+        <p class="muted" id="b-count" style="text-align:right;"></p>
+        <div class="bar"><div class="bar-fill" id="b-fill"></div></div>
+        <span class="q-domain" id="b-domain"></span>
+        <p class="q-text" id="b-question"></p>
+        <div class="answers">
+          <button class="answer a0" onclick="bAnswer(0)"><span class="dot"></span><span>Je ne l'ai jamais fait</span></button>
+          <button class="answer a1" onclick="bAnswer(1)"><span class="dot"></span><span>J'ai déjà essayé, mais c'est difficile</span></button>
+          <button class="answer a2" onclick="bAnswer(2)"><span class="dot"></span><span>Je le fais sans problème</span></button>
+        </div>
+        <button class="back-link" id="b-back" onclick="bBack()">← Question précédente</button>
+      </div>
+      <div id="bilan-end" class="hidden">
+        <h2>Bilan terminé</h2>
+        <div id="bilan-recap"></div>
+        <label>Notes de séance (blocages précis, objectifs de l'élève...)</label>
+        <textarea id="bilan-notes" placeholder="Ex : bloque sur les pièces jointes, a peur des arnaques..."></textarea>
+        <button class="btn" onclick="saveBilan()">Enregistrer le bilan</button>
+      </div>
+    </div>
+
+    <!-- ===== TAB BIBLIOTHÈQUE ===== -->
+    <div id="tab-biblio" class="hidden">
+      <label>Catégorie</label>
+      <select id="biblio-cat" onchange="loadBiblio()">
+        <option value="anti_objections">Anti-objections</option>
+        <option value="scripts_b2b">Scripts B2B</option>
+        <option value="modules">Modules de cours</option>
+        <option value="quiz">Quiz</option>
+        <option value="tarifs">Tarifs et offres</option>
+      </select>
+      <button class="btn ghost" onclick="toggleNewContent()">Ajouter un contenu</button>
+      <div class="card hidden" id="new-content-form">
+        <label>Titre</label><input id="ct-titre">
+        <label>Contenu</label><textarea id="ct-corps" style="min-height:160px;"></textarea>
+        <button class="btn" onclick="createContent()">Enregistrer</button>
+      </div>
+      <div id="biblio-list" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- ===== TAB DIPLÔME ===== -->
+    <div id="tab-diplome" class="hidden">
+      <h2>Générer un diplôme</h2>
+      <label>Prénom et nom de l'élève</label>
+      <input id="d-name" placeholder="Ex : Martine Dupont">
+      <label>Module validé</label>
+      <input id="d-module" placeholder="Ex : Gérer ses e-mails en toute confiance">
+      <label>Nom du formateur</label>
+      <input id="d-formateur" placeholder="Ton nom">
+      <label>Date</label>
+      <input id="d-date" type="date">
+      <button class="btn" onclick="renderDiplome()">Afficher le diplôme</button>
+      <button class="btn ghost" onclick="window.print()">Imprimer / Enregistrer en PDF</button>
+
+      <div class="diplome" id="diplome-preview">
+        <p class="d-eyebrow">Certificat de réussite</p>
+        <p class="d-title">Diplôme du Numérique</p>
+        <p class="d-sub">est fièrement décerné à</p>
+        <p class="d-name" id="dp-name">Prénom Nom</p>
+        <div class="d-line"></div>
+        <p class="d-module">pour avoir validé le module<br><strong id="dp-module">Titre du module</strong></p>
+        <p class="d-sub">avec patience, courage et curiosité.</p>
+        <div class="d-footer">
+          <div class="d-sign" id="dp-date">Date</div>
+          <div class="d-sign" id="dp-formateur">Formateur</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// INIT
+// ============================================================
+const sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+let clientsCache = [];
+
+const DOMAINS = [
+  { name:"Prise en main", questions:[
+    "Allumer et déverrouiller votre appareil, vous le faites ?",
+    "Cliquer ou appuyer exactement où vous voulez sur l'écran ?",
+    "Écrire un petit texte avec le clavier ?",
+    "Régler le son ou la taille des lettres à l'écran ?" ]},
+  { name:"Internet au quotidien", questions:[
+    "Ouvrir Internet et aller sur un site que vous connaissez ?",
+    "Chercher une information sur Google (une recette, un horaire...) ?",
+    "Revenir en arrière quand vous êtes perdu sur une page ?",
+    "Retrouver une photo ou un document enregistré dans l'appareil ?" ]},
+  { name:"E-mails et démarches", questions:[
+    "Lire et envoyer un e-mail ?",
+    "Ouvrir ou envoyer une pièce jointe (photo, document) ?",
+    "Vous connecter à un compte en ligne (Ameli, impôts, banque...) ?",
+    "Faire un achat ou un paiement sur Internet ?" ]},
+  { name:"Sécurité et confiance", questions:[
+    "Repérer un e-mail ou un SMS qui sent l'arnaque ?",
+    "Gérer vos mots de passe sans les perdre ?",
+    "Faire les mises à jour quand l'appareil les propose ?",
+    "Savoir quoi faire (et qui appeler) en cas de doute ?" ]}
+];
+const LABELS = ["Jamais fait","Essayé mais difficile","Sans problème"];
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function levelOf(sum){
+  if(sum<=3) return {cls:'decouvrir', label:'À découvrir ensemble'};
+  if(sum<=6) return {cls:'progres', label:'En bonne voie'};
+  return {cls:'fort', label:'Point fort'};
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+async function login(){
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ document.getElementById('login-err').textContent = "Connexion impossible. Vérifie e-mail et mot de passe."; return; }
+  enterApp();
+}
+async function logout(){ await sb.auth.signOut(); location.reload(); }
+async function enterApp(){
+  document.getElementById('v-login').classList.add('hidden');
+  document.getElementById('v-app').classList.remove('hidden');
+  await loadClients();
+  loadBiblio();
+}
+sb.auth.getSession().then(({data})=>{ if(data.session) enterApp(); });
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showTab(name){
+  ['clients','bilan','biblio','diplome'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==name);
+    document.querySelector('nav button[data-tab="'+t+'"]').classList.toggle('on', t===name);
+  });
+  if(name==='bilan') fillBilanSelect();
+}
+
+// ============================================================
+// CLIENTS
+// ============================================================
+async function loadClients(){
+  const { data, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
+  if(error){ toast("Erreur de chargement clients"); return; }
+  clientsCache = data;
+  const el = document.getElementById('clients-list');
+  if(!data.length){ el.innerHTML = '<p class="muted">Aucun client pour le moment. Ajoute le premier.</p>'; return; }
+  el.innerHTML = data.map(c=>
+    '<div class="card click" onclick="openClient(\''+c.id+'\')">'
+    +'<div class="row"><h3>'+esc(c.prenom)+' '+esc(c.nom)+'</h3>'
+    +'<span class="badge '+c.statut+'">'+c.statut+'</span></div>'
+    +'<p class="muted">'+esc(c.appareil||'Appareil non renseigné')+(c.telephone? ' · '+esc(c.telephone):'')+'</p>'
+    +'</div>').join('');
+}
+function toggleNewClient(){ document.getElementById('new-client-form').classList.toggle('hidden'); }
+async function createClient(){
+  const prenom = document.getElementById('nc-prenom').value.trim();
+  if(!prenom){ toast("Le prénom est obligatoire"); return; }
+  const { error } = await sb.from('clients').insert({
+    prenom,
+    nom: document.getElementById('nc-nom').value.trim(),
+    telephone: document.getElementById('nc-tel').value.trim(),
+    appareil: document.getElementById('nc-appareil').value.trim(),
+    statut: document.getElementById('nc-statut').value
+  });
+  if(error){ toast("Erreur à l'enregistrement"); return; }
+  toast("Client ajouté");
+  document.getElementById('new-client-form').classList.add('hidden');
+  ['nc-prenom','nc-nom','nc-tel','nc-appareil'].forEach(id=>document.getElementById(id).value='');
+  loadClients();
+}
+function backToClients(){
+  document.getElementById('client-detail-view').classList.add('hidden');
+  document.getElementById('clients-list-view').classList.remove('hidden');
+}
+async function openClient(id){
+  const c = clientsCache.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('clients-list-view').classList.add('hidden');
+  document.getElementById('client-detail-view').classList.remove('hidden');
+
+  const [{data:bilans},{data:routes}] = await Promise.all([
+    sb.from('bilans').select('*').eq('client_id',id).order('created_at',{ascending:false}),
+    sb.from('feuilles_route').select('*').eq('client_id',id).order('created_at',{ascending:false})
+  ]);
+
+  let html = '<div class="card"><div class="row"><h2 style="margin:0;">'+esc(c.prenom)+' '+esc(c.nom)+'</h2>'
+    +'<span class="badge '+c.statut+'">'+c.statut+'</span></div>'
+    +'<p class="muted" style="margin-top:6px;">'+esc(c.appareil||'')+(c.telephone? ' · '+esc(c.telephone):'')+'</p>'
+    +'<label>Statut</label><select id="cd-statut">'
+    +['prospect','actif','termine'].map(s=>'<option value="'+s+'"'+(c.statut===s?' selected':'')+'>'+s+'</option>').join('')
+    +'</select>'
+    +'<label>Notes</label><textarea id="cd-notes">'+esc(c.notes||'')+'</textarea>'
+    +'<button class="btn-sm" style="margin-top:12px;" onclick="saveClient(\''+c.id+'\')">Enregistrer les modifications</button></div>';
+
+  html += '<h3 style="margin:20px 0 10px;">Bilans</h3>';
+  if(bilans && bilans.length){
+    html += bilans.map(b=>{
+      const recap = b.scores.map(d=>{
+        const lv = levelOf(d.score);
+        return '<span class="badge '+lv.cls+'" style="margin:2px 4px 2px 0;">'+esc(d.domaine)+' : '+d.score+'/8</span>';
+      }).join('');
+      return '<div class="card"><p class="muted">'+new Date(b.created_at).toLocaleDateString('fr-FR')+'</p>'
+        +'<div style="margin:8px 0;">'+recap+'</div>'
+        +(b.notes? '<p class="muted">Notes : '+esc(b.notes)+'</p>':'')+'</div>';
+    }).join('');
+    html += '<button class="btn" id="btn-generate" onclick="generateRoadmap(\''+c.id+'\')">Générer la feuille de route (IA)</button>';
+  } else {
+    html += '<p class="muted">Aucun bilan. Va dans l\'onglet Bilan pour en faire un.</p>';
+  }
+
+  html += '<h3 style="margin:24px 0 10px;">Feuilles de route</h3>';
+  if(routes && routes.length){
+    html += routes.map(r=>
+      '<div class="card"><p class="muted">'+new Date(r.created_at).toLocaleDateString('fr-FR')+'</p>'
+      +'<h3 style="margin:8px 0;">Programme</h3><pre>'+esc(r.contenu)+'</pre>'
+      +(r.premier_cours? '<h3 style="margin:14px 0 8px;">Premier cours</h3><pre>'+esc(r.premier_cours)+'</pre>':'')
+      +'</div>').join('');
+  } else {
+    html += '<p class="muted">Aucune feuille de route générée.</p>';
+  }
+
+  document.getElementById('client-detail').innerHTML = html;
+}
+async function saveClient(id){
+  const { error } = await sb.from('clients').update({
+    statut: document.getElementById('cd-statut').value,
+    notes: document.getElementById('cd-notes').value
+  }).eq('id',id);
+  if(error){ toast("Erreur"); return; }
+  toast("Modifications enregistrées");
+  await loadClients(); openClient(id);
+}
+
+// ============================================================
+// GÉNÉRATION FEUILLE DE ROUTE (Edge Function -> API Claude)
+// ============================================================
+async function generateRoadmap(clientId){
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = true; btn.textContent = "Génération en cours (30 à 60 s)...";
+
+  const c = clientsCache.find(x=>x.id===clientId);
+  const { data: bilans } = await sb.from('bilans').select('*')
+    .eq('client_id',clientId).order('created_at',{ascending:false}).limit(1);
+  if(!bilans || !bilans.length){ toast("Aucun bilan trouvé"); btn.disabled=false; return; }
+  const b = bilans[0];
+
+  const bilanTxt = b.scores.map(d=>
+    d.domaine+' — '+d.score+'/8 ('+levelOf(d.score).label+')\n'
+    + d.questions.map(q=>'  · '+q.q+' → '+LABELS[q.reponse]).join('\n')
+  ).join('\n\n');
+
+  try{
+    const { data: session } = await sb.auth.getSession();
+    const res = await fetch(CONFIG.SUPABASE_URL+'/functions/v1/'+CONFIG.EDGE_FUNCTION, {
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'authorization':'Bearer '+session.session.access_token
+      },
+      body: JSON.stringify({ prenom:c.prenom, appareil:c.appareil, bilan:bilanTxt, notes:b.notes })
+    });
+    const out = await res.json();
+    if(out.error) throw new Error(out.error);
+
+    const { error } = await sb.from('feuilles_route').insert({
+      client_id: clientId,
+      contenu: out.feuille_de_route,
+      premier_cours: out.premier_cours
+    });
+    if(error) throw error;
+    toast("Feuille de route générée");
+    openClient(clientId);
+  }catch(e){
+    toast("Erreur de génération : "+e.message);
+    btn.disabled = false; btn.textContent = "Générer la feuille de route (IA)";
+  }
+}
+
+// ============================================================
+// BILAN (quiz)
+// ============================================================
+let bFlat=[], bIdx=0, bScores=[], bClientId=null;
+DOMAINS.forEach((d,di)=>d.questions.forEach((q,qi)=>bFlat.push({di,qi,q,domain:d.name})));
+
+function fillBilanSelect(){
+  const sel = document.getElementById('bilan-client');
+  sel.innerHTML = clientsCache.map(c=>'<option value="'+c.id+'">'+esc(c.prenom)+' '+esc(c.nom)+'</option>').join('')
+    || '<option value="">Ajoute d\'abord un client</option>';
+}
+function startBilan(){
+  bClientId = document.getElementById('bilan-client').value;
+  if(!bClientId){ toast("Sélectionne un client"); return; }
+  bIdx=0; bScores=[];
+  document.getElementById('bilan-setup').classList.add('hidden');
+  document.getElementById('bilan-end').classList.add('hidden');
+  document.getElementById('bilan-quiz').classList.remove('hidden');
+  bRender();
+}
+function bRender(){
+  const item = bFlat[bIdx];
+  document.getElementById('b-domain').textContent = item.domain;
+  document.getElementById('b-question').textContent = item.q;
+  document.getElementById('b-count').textContent = (bIdx+1)+' / '+bFlat.length;
+  document.getElementById('b-fill').style.width = (bIdx/bFlat.length*100)+'%';
+  document.getElementById('b-back').style.visibility = bIdx===0?'hidden':'visible';
+}
+function bAnswer(v){
+  bScores[bIdx]=v;
+  if(bIdx<bFlat.length-1){ bIdx++; bRender(); } else { bEnd(); }
+}
+function bBack(){ if(bIdx>0){ bIdx--; bRender(); } }
+function bEnd(){
+  document.getElementById('bilan-quiz').classList.add('hidden');
+  document.getElementById('bilan-end').classList.remove('hidden');
+  let html='';
+  DOMAINS.forEach((d,di)=>{
+    let sum=0;
+    d.questions.forEach((q,qi)=>{ sum += bScores[di*4+qi]; });
+    const lv = levelOf(sum);
+    html += '<span class="badge '+lv.cls+'" style="margin:3px 6px 3px 0;">'+d.name+' : '+sum+'/8 — '+lv.label+'</span>';
+  });
+  document.getElementById('bilan-recap').innerHTML = '<div class="card">'+html+'</div>';
+}
+async function saveBilan(){
+  const scores = DOMAINS.map((d,di)=>{
+    let sum=0;
+    const questions = d.questions.map((q,qi)=>{
+      const v = bScores[di*4+qi]; sum+=v;
+      return { q, reponse:v };
+    });
+    return { domaine:d.name, score:sum, questions };
+  });
+  const { error } = await sb.from('bilans').insert({
+    client_id: bClientId, scores,
+    notes: document.getElementById('bilan-notes').value
+  });
+  if(error){ toast("Erreur à l'enregistrement"); return; }
+  toast("Bilan enregistré");
+  document.getElementById('bilan-end').classList.add('hidden');
+  document.getElementById('bilan-setup').classList.remove('hidden');
+  document.getElementById('bilan-notes').value='';
+}
+
+// ============================================================
+// BIBLIOTHÈQUE
+// ============================================================
+async function loadBiblio(){
+  const cat = document.getElementById('biblio-cat').value;
+  const { data, error } = await sb.from('contenus').select('*').eq('categorie',cat).order('created_at');
+  if(error){ toast("Erreur de chargement"); return; }
+  const el = document.getElementById('biblio-list');
+  if(!data.length){ el.innerHTML='<p class="muted">Rien dans cette catégorie pour le moment.</p>'; return; }
+  el.innerHTML = data.map(c=>
+    '<div class="card"><h3>'+esc(c.titre)+'</h3><pre style="margin-top:8px;">'+esc(c.corps)+'</pre></div>').join('');
+}
+function toggleNewContent(){ document.getElementById('new-content-form').classList.toggle('hidden'); }
+async function createContent(){
+  const titre = document.getElementById('ct-titre').value.trim();
+  const corps = document.getElementById('ct-corps').value.trim();
+  if(!titre || !corps){ toast("Titre et contenu obligatoires"); return; }
+  const { error } = await sb.from('contenus').insert({
+    categorie: document.getElementById('biblio-cat').value, titre, corps
+  });
+  if(error){ toast("Erreur"); return; }
+  toast("Contenu ajouté");
+  document.getElementById('ct-titre').value=''; document.getElementById('ct-corps').value='';
+  document.getElementById('new-content-form').classList.add('hidden');
+  loadBiblio();
+}
+
+// ============================================================
+// DIPLÔME
+// ============================================================
+function renderDiplome(){
+  document.getElementById('dp-name').textContent = document.getElementById('d-name').value || 'Prénom Nom';
+  document.getElementById('dp-module').textContent = document.getElementById('d-module').value || 'Titre du module';
+  document.getElementById('dp-formateur').textContent = document.getElementById('d-formateur').value || 'Formateur';
+  const d = document.getElementById('d-date').value;
+  document.getElementById('dp-date').textContent = d ? new Date(d).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+}
+</script>
+</body>
+</html>
