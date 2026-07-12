@@ -83,24 +83,51 @@
   .bar{height:7px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0 20px;}
   .bar-fill{height:100%;background:var(--honey);border-radius:99px;width:0%;transition:width .3s;}
 
-  /* DIPLÔME */
-  .diplome{background:#fff;border:3px double var(--blue);border-radius:4px;padding:48px 40px;
-    text-align:center;margin-top:20px;}
-  .diplome .d-eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;
-    color:var(--honey);font-weight:600;margin-bottom:18px;}
-  .diplome .d-title{font-size:30px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px;}
-  .diplome .d-sub{color:var(--ink-soft);font-size:15px;margin-bottom:26px;}
-  .diplome .d-name{font-size:34px;font-weight:700;color:var(--blue);margin:10px 0;}
-  .diplome .d-module{font-size:18px;margin:14px 0 26px;}
-  .diplome .d-module strong{color:var(--blue);}
-  .diplome .d-line{width:80px;height:2px;background:var(--honey);margin:0 auto 22px;}
-  .diplome .d-footer{display:flex;justify-content:space-between;margin-top:36px;
-    font-size:13px;color:var(--ink-soft);}
-  .diplome .d-sign{border-top:1.5px solid var(--line);padding-top:8px;min-width:150px;}
+  /* DIPLÔME PRESTIGE */
+  .diplome{
+    background:#FFFEF9;
+    border:5px double #2A3A55;
+    padding:52px 44px;text-align:center;margin-top:20px;position:relative;
+    font-family:Georgia,'Times New Roman',serif;color:#1E2A3D;
+  }
+  .diplome::before{
+    content:'';position:absolute;inset:10px;border:1.5px solid #B8963E;pointer-events:none;
+  }
+  .diplome .d-eyebrow{font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:#2A3A55;font-weight:400;margin-bottom:6px;}
+  .diplome .d-org{font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:#8A7642;margin-bottom:26px;}
+  .diplome .d-title{font-size:36px;font-weight:400;letter-spacing:.03em;margin-bottom:4px;
+    font-variant:small-caps;}
+  .diplome .d-rule{display:flex;align-items:center;gap:12px;justify-content:center;margin:14px auto 22px;max-width:340px;}
+  .diplome .d-rule::before,.diplome .d-rule::after{content:'';flex:1;height:1px;background:#B8963E;}
+  .diplome .d-rule span{color:#B8963E;font-size:13px;}
+  .diplome .d-sub{color:#5B6B7A;font-size:15px;font-style:italic;margin-bottom:8px;}
+  .diplome .d-name{font-size:38px;font-weight:400;color:#1E2A3D;margin:12px 0 4px;
+    font-style:italic;}
+  .diplome .d-name-line{width:260px;height:1px;background:#2A3A55;margin:0 auto 24px;}
+  .diplome .d-module{font-size:17px;margin:10px 0 8px;line-height:1.6;}
+  .diplome .d-module strong{font-variant:small-caps;font-size:20px;letter-spacing:.02em;font-weight:400;}
+  .diplome .d-mention{font-size:15px;margin:16px 0 6px;}
+  .diplome .d-mention strong{color:#8A7642;font-variant:small-caps;font-size:18px;font-weight:400;letter-spacing:.04em;}
+  .diplome .d-lieu{font-size:14px;font-style:italic;color:#5B6B7A;margin-top:26px;}
+  .diplome .d-footer{display:flex;justify-content:space-between;align-items:flex-end;
+    margin-top:34px;font-size:13px;color:#5B6B7A;}
+  .diplome .d-sign{border-top:1px solid #2A3A55;padding-top:8px;min-width:170px;font-style:italic;}
+  .diplome .d-seal{
+    width:92px;height:92px;border-radius:50%;border:2px solid #B8963E;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:#8A7642;position:relative;flex-shrink:0;background:#FDF8EC;
+  }
+  .diplome .d-seal::before{content:'';position:absolute;inset:5px;border:1px solid #B8963E;border-radius:50%;}
+  .diplome .d-seal .seal-star{font-size:16px;line-height:1;}
+  .diplome .d-seal .seal-txt{font-size:8px;letter-spacing:.18em;text-transform:uppercase;
+    margin-top:4px;text-align:center;line-height:1.5;}
   @media print{
+    @page{size:A4 landscape;margin:0;}
     body *{visibility:hidden;}
     .diplome, .diplome *{visibility:visible;}
-    .diplome{position:fixed;inset:0;margin:0;border-radius:0;display:flex;
+    .diplome{position:fixed;inset:0;margin:0;display:flex;
       flex-direction:column;justify-content:center;}
   }
 </style>
@@ -131,6 +158,7 @@
     <nav>
       <button data-tab="clients" class="on" onclick="showTab('clients')">Clients</button>
       <button data-tab="bilan" onclick="showTab('bilan')">Bilan</button>
+      <button data-tab="cours" onclick="showTab('cours')">Cours</button>
       <button data-tab="biblio" onclick="showTab('biblio')">Bibliothèque</button>
       <button data-tab="diplome" onclick="showTab('diplome')">Diplôme</button>
     </nav>
@@ -190,6 +218,27 @@
       </div>
     </div>
 
+    <!-- ===== TAB COURS ===== -->
+    <div id="tab-cours" class="hidden">
+      <div id="cours-list-view">
+        <h2>Bibliothèque de cours</h2>
+        <p class="muted" style="margin-bottom:12px;">Tous les cours restent accessibles, même sur les points forts : un élève peut toujours revoir un domaine qu'il maîtrise.</p>
+        <label>Domaine</label>
+        <select id="cours-domaine" onchange="renderCoursList()">
+          <option value="">Tous les domaines</option>
+          <option value="Prise en main">Prise en main</option>
+          <option value="Internet au quotidien">Internet au quotidien</option>
+          <option value="E-mails et démarches">E-mails et démarches</option>
+          <option value="Sécurité et confiance">Sécurité et confiance</option>
+        </select>
+        <div id="cours-list" style="margin-top:16px;"></div>
+      </div>
+      <div id="cours-detail-view" class="hidden">
+        <button class="back-link" onclick="backToCours()">← Retour aux cours</button>
+        <div id="cours-detail"></div>
+      </div>
+    </div>
+
     <!-- ===== TAB BIBLIOTHÈQUE ===== -->
     <div id="tab-biblio" class="hidden">
       <label>Catégorie</label>
@@ -218,22 +267,38 @@
       <input id="d-module" placeholder="Ex : Gérer ses e-mails en toute confiance">
       <label>Nom du formateur</label>
       <input id="d-formateur" placeholder="Ton nom">
+      <label>Mention</label>
+      <select id="d-mention">
+        <option value="">Sans mention</option>
+        <option value="Assez bien">Assez bien</option>
+        <option value="Bien">Bien</option>
+        <option value="Très bien">Très bien</option>
+        <option value="Très bien avec les félicitations du formateur">Très bien avec les félicitations du formateur</option>
+      </select>
+      <label>Fait à (ville)</label>
+      <input id="d-ville" placeholder="Ex : Versailles">
       <label>Date</label>
       <input id="d-date" type="date">
       <button class="btn" onclick="renderDiplome()">Afficher le diplôme</button>
       <button class="btn ghost" onclick="window.print()">Imprimer / Enregistrer en PDF</button>
 
       <div class="diplome" id="diplome-preview">
-        <p class="d-eyebrow">Certificat de réussite</p>
+        <p class="d-eyebrow">Certificat de compétences numériques</p>
+        <p class="d-org" id="dp-org">Formation individuelle à domicile</p>
         <p class="d-title">Diplôme du Numérique</p>
-        <p class="d-sub">est fièrement décerné à</p>
+        <div class="d-rule"><span>&#10022;</span></div>
+        <p class="d-sub">Le présent diplôme est décerné à</p>
         <p class="d-name" id="dp-name">Prénom Nom</p>
-        <div class="d-line"></div>
-        <p class="d-module">pour avoir validé le module<br><strong id="dp-module">Titre du module</strong></p>
-        <p class="d-sub">avec patience, courage et curiosité.</p>
+        <div class="d-name-line"></div>
+        <p class="d-module">qui a suivi avec assiduité et validé l'ensemble des épreuves du module<br><strong id="dp-module">Titre du module</strong></p>
+        <p class="d-mention" id="dp-mention-wrap">obtenu avec la mention <strong id="dp-mention">Très bien</strong></p>
+        <p class="d-lieu" id="dp-lieu">Fait à Versailles, le 12 juillet 2026</p>
         <div class="d-footer">
-          <div class="d-sign" id="dp-date">Date</div>
-          <div class="d-sign" id="dp-formateur">Formateur</div>
+          <div class="d-seal">
+            <span class="seal-star">&#10022;</span>
+            <span class="seal-txt">Inclusion<br>numérique<br>des aînés</span>
+          </div>
+          <div class="d-sign">Le formateur,<br><span id="dp-formateur" style="color:#1E2A3D;">Formateur</span></div>
         </div>
       </div>
     </div>
@@ -301,6 +366,7 @@ async function enterApp(){
   document.getElementById('v-app').classList.remove('hidden');
   await loadClients();
   loadBiblio();
+  loadCoursCache();
 }
 sb.auth.getSession().then(({data})=>{ if(data.session) enterApp(); });
 
@@ -308,11 +374,12 @@ sb.auth.getSession().then(({data})=>{ if(data.session) enterApp(); });
 // NAVIGATION
 // ============================================================
 function showTab(name){
-  ['clients','bilan','biblio','diplome'].forEach(t=>{
+  ['clients','bilan','cours','biblio','diplome'].forEach(t=>{
     document.getElementById('tab-'+t).classList.toggle('hidden', t!==name);
     document.querySelector('nav button[data-tab="'+t+'"]').classList.toggle('on', t===name);
   });
   if(name==='bilan') fillBilanSelect();
+  if(name==='cours') renderCoursList();
 }
 
 // ============================================================
@@ -384,6 +451,25 @@ async function openClient(id){
         +(b.notes? '<p class="muted">Notes : '+esc(b.notes)+'</p>':'')+'</div>';
     }).join('');
     html += '<button class="btn" id="btn-generate" onclick="generateRoadmap(\''+c.id+'\')">Générer la feuille de route (IA)</button>';
+
+    // Cours recommandés selon le dernier bilan
+    const last = bilans[0];
+    let recoHtml = '';
+    last.scores.forEach(d=>{
+      const niv = nivReco(d.score);
+      const cr = coursCache.find(k=>k.domaine===d.domaine && k.niveau===niv);
+      if(cr){
+        recoHtml += '<div class="card click" onclick="openCoursFromFiche(\''+cr.id+'\')">'
+          +'<div class="row"><h3>'+esc(cr.titre)+'</h3>'
+          +'<span class="badge '+NIVEAU_CLS[niv]+'">'+NIVEAUX[niv]+'</span></div>'
+          +'<p class="muted">'+esc(d.domaine)+' — score '+d.score+'/8</p></div>';
+      }
+    });
+    if(recoHtml){
+      html += '<h3 style="margin:24px 0 10px;">Cours recommandés</h3>'
+        +'<p class="muted" style="margin-bottom:10px;">Calculés depuis le dernier bilan. Pour revoir un point fort à la demande de l\'élève, tous les cours restent dans l\'onglet Cours.</p>'
+        + recoHtml;
+    }
   } else {
     html += '<p class="muted">Aucun bilan. Va dans l\'onglet Bilan pour en faire un.</p>';
   }
@@ -522,6 +608,93 @@ async function saveBilan(){
 }
 
 // ============================================================
+// COURS : bibliothèque, recommandations, quiz
+// ============================================================
+let coursCache = [], currentQuiz = [];
+const NIVEAUX = {1:'Découverte', 2:'Pratique', 3:'Perfectionnement'};
+const NIVEAU_CLS = {1:'decouvrir', 2:'progres', 3:'fort'};
+
+async function loadCoursCache(){
+  const { data, error } = await sb.from('cours').select('*').order('domaine').order('niveau');
+  if(!error) coursCache = data || [];
+}
+function nivReco(score){ return score<=3 ? 1 : (score<=6 ? 2 : 3); }
+
+function renderCoursList(){
+  const el = document.getElementById('cours-list');
+  if(!coursCache.length){
+    el.innerHTML = '<p class="muted">Aucun cours en base. Exécute le fichier cours.sql dans Supabase.</p>';
+    loadCoursCache().then(()=>{ if(coursCache.length) renderCoursList(); });
+    return;
+  }
+  const filtre = document.getElementById('cours-domaine').value;
+  const list = filtre ? coursCache.filter(c=>c.domaine===filtre) : coursCache;
+  el.innerHTML = list.map(c=>
+    '<div class="card click" onclick="openCoursById(\''+c.id+'\')">'
+    +'<div class="row"><h3>'+esc(c.titre)+'</h3>'
+    +'<span class="badge '+NIVEAU_CLS[c.niveau]+'">'+NIVEAUX[c.niveau]+'</span></div>'
+    +'<p class="muted">'+esc(c.domaine)+'</p></div>').join('');
+}
+function backToCours(){
+  document.getElementById('cours-detail-view').classList.add('hidden');
+  document.getElementById('cours-list-view').classList.remove('hidden');
+}
+function openCoursById(id){
+  const c = coursCache.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('cours-list-view').classList.add('hidden');
+  document.getElementById('cours-detail-view').classList.remove('hidden');
+  currentQuiz = c.quiz || [];
+
+  let html = '<span class="badge '+NIVEAU_CLS[c.niveau]+'">'+NIVEAUX[c.niveau]+'</span>'
+    +' <span class="q-domain">'+esc(c.domaine)+'</span>'
+    +'<h2 style="margin:12px 0;">'+esc(c.titre)+'</h2>'
+    +'<div class="card"><pre>'+esc(c.corps)+'</pre></div>';
+
+  if(c.situation){
+    html += '<h3 style="margin:20px 0 10px;">Mise en situation</h3>'
+      +'<div class="card" style="border-left:4px solid var(--honey);"><pre>'+esc(c.situation)+'</pre></div>';
+  }
+  if(currentQuiz.length){
+    html += '<h3 style="margin:20px 0 10px;">Quiz bienveillant</h3>';
+    html += currentQuiz.map((item,qi)=>
+      '<div class="card"><p style="font-weight:700;margin-bottom:12px;">'+(qi+1)+'. '+esc(item.q)+'</p>'
+      +'<div class="answers" id="qz-'+qi+'">'
+      + item.options.map((o,oi)=>
+        '<button class="answer" onclick="quizAnswer('+qi+','+oi+')"><span class="dot"></span><span>'+esc(o)+'</span></button>'
+      ).join('')
+      +'</div><p class="muted" id="fb-'+qi+'" style="margin-top:10px;"></p></div>'
+    ).join('');
+  }
+  document.getElementById('cours-detail').innerHTML = html;
+  window.scrollTo({top:0});
+}
+function quizAnswer(qi, oi){
+  const item = currentQuiz[qi];
+  const zone = document.getElementById('qz-'+qi);
+  const btns = zone.querySelectorAll('.answer');
+  btns.forEach(b=>{ b.disabled = true; b.style.cursor='default'; });
+  const fb = document.getElementById('fb-'+qi);
+  if(oi === item.bonne){
+    btns[oi].style.borderColor = 'var(--green)';
+    btns[oi].style.background = 'var(--green-soft)';
+    fb.textContent = item.bravo || 'Bonne réponse !';
+    fb.style.color = 'var(--green)';
+  } else {
+    btns[oi].style.borderColor = '#D9A79F';
+    btns[oi].style.background = 'var(--red-soft)';
+    btns[item.bonne].style.borderColor = 'var(--green)';
+    btns[item.bonne].style.background = 'var(--green-soft)';
+    fb.textContent = item.aide || 'Pas tout à fait, regardez la bonne réponse en vert.';
+    fb.style.color = 'var(--red-ink)';
+  }
+}
+function openCoursFromFiche(id){
+  showTab('cours');
+  openCoursById(id);
+}
+
+// ============================================================
 // BIBLIOTHÈQUE
 // ============================================================
 async function loadBiblio(){
@@ -555,8 +728,13 @@ function renderDiplome(){
   document.getElementById('dp-name').textContent = document.getElementById('d-name').value || 'Prénom Nom';
   document.getElementById('dp-module').textContent = document.getElementById('d-module').value || 'Titre du module';
   document.getElementById('dp-formateur').textContent = document.getElementById('d-formateur').value || 'Formateur';
+  const mention = document.getElementById('d-mention').value;
+  document.getElementById('dp-mention-wrap').style.display = mention ? 'block' : 'none';
+  document.getElementById('dp-mention').textContent = mention;
+  const ville = document.getElementById('d-ville').value || 'Versailles';
   const d = document.getElementById('d-date').value;
-  document.getElementById('dp-date').textContent = d ? new Date(d).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+  const dateFr = (d ? new Date(d) : new Date()).toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('dp-lieu').textContent = 'Fait à '+ville+', le '+dateFr;
 }
 </script>
 </body>
