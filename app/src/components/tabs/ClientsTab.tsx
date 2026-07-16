@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Search } from "lucide-react"
 import { toast } from "sonner"
 
+import { Stagger, StaggerItem } from "@/components/Motion"
 import { ToneBadge } from "@/components/ToneBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -156,28 +157,29 @@ function ClientsList({ onOpen }: { onOpen: (id: string) => void }) {
           Aucun client ne correspond à cette recherche.
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <Stagger className="flex flex-col gap-3">
           {list.map((c) => (
-            <Card
-              key={c.id}
-              className="hover:border-primary cursor-pointer transition-colors"
-              onClick={() => onOpen(c.id)}
-            >
-              <CardContent className="flex flex-col gap-1">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-base font-bold">
-                    {c.prenom} {c.nom}
-                  </h3>
-                  <ToneBadge tone={c.statut}>{c.statut}</ToneBadge>
-                </div>
-                <p className="text-muted-foreground text-sm">
-                  {c.appareil || "Appareil non renseigné"}
-                  {c.telephone ? ` · ${c.telephone}` : ""}
-                </p>
-              </CardContent>
-            </Card>
+            <StaggerItem key={c.id}>
+              <Card
+                className="hover:border-primary cursor-pointer transition-colors"
+                onClick={() => onOpen(c.id)}
+              >
+                <CardContent className="flex flex-col gap-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="text-base font-bold">
+                      {c.prenom} {c.nom}
+                    </h3>
+                    <ToneBadge tone={c.statut}>{c.statut}</ToneBadge>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    {c.appareil || "Appareil non renseigné"}
+                    {c.telephone ? ` · ${c.telephone}` : ""}
+                  </p>
+                </CardContent>
+              </Card>
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   )

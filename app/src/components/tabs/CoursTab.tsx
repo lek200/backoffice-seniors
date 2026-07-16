@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Search } from "lucide-react"
 import { toast } from "sonner"
 
+import { Stagger, StaggerItem } from "@/components/Motion"
 import { ToneBadge } from "@/components/ToneBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -109,28 +111,31 @@ function CoursList({ onOpen }: { onOpen: (id: string) => void }) {
             Aucun cours ne correspond à cette recherche.
           </p>
         ) : (
-          list.map((c) => (
-            <Card
-              key={c.id}
-              className="hover:border-primary cursor-pointer transition-colors"
-              onClick={() => onOpen(c.id)}
-            >
-              <CardContent className="flex flex-col gap-1">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-base font-bold">{c.titre}</h3>
-                  <div className="flex items-center gap-1.5">
-                    {c.statut !== "publie" && (
-                      <ToneBadge tone="prospect">À générer</ToneBadge>
-                    )}
-                    <ToneBadge tone={NIVEAU_CLS[c.niveau]}>
-                      {NIVEAUX[c.niveau]}
-                    </ToneBadge>
-                  </div>
-                </div>
-                <p className="text-muted-foreground text-sm">{c.domaine}</p>
-              </CardContent>
-            </Card>
-          ))
+          <Stagger className="flex flex-col gap-3">
+            {list.map((c) => (
+              <StaggerItem key={c.id}>
+                <Card
+                  className="hover:border-primary cursor-pointer transition-colors"
+                  onClick={() => onOpen(c.id)}
+                >
+                  <CardContent className="flex flex-col gap-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-base font-bold">{c.titre}</h3>
+                      <div className="flex items-center gap-1.5">
+                        {c.statut !== "publie" && (
+                          <ToneBadge tone="prospect">À générer</ToneBadge>
+                        )}
+                        <ToneBadge tone={NIVEAU_CLS[c.niveau]}>
+                          {NIVEAUX[c.niveau]}
+                        </ToneBadge>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground text-sm">{c.domaine}</p>
+                  </CardContent>
+                </Card>
+              </StaggerItem>
+            ))}
+          </Stagger>
         )}
       </div>
     </div>
@@ -154,19 +159,23 @@ function CoursPlayer({ cours, onBack }: { cours: Cours; onBack: () => void }) {
     [published, cours]
   )
   const [idx, setIdx] = useState(0)
+  const [dir, setDir] = useState(1)
   const [quizResults, setQuizResults] = useState<Record<number, QuizResult>>({})
   const [generating, setGenerating] = useState(false)
   const [progClient, setProgClient] = useState<string>(clients[0]?.id ?? "")
+  const reduce = useReducedMotion()
+
+  function goTo(nextIdx: number, direction: number) {
+    setDir(direction)
+    setIdx(nextIdx)
+    window.scrollTo({ top: 0 })
+  }
 
   useEffect(() => {
     setIdx(0)
     setQuizResults({})
     window.scrollTo({ top: 0 })
   }, [cours.id])
-
-  function scrollTop() {
-    window.scrollTo({ top: 0 })
-  }
 
   async function generateCours() {
     setGenerating(true)
@@ -285,40 +294,45 @@ function CoursPlayer({ cours, onBack }: { cours: Cours; onBack: () => void }) {
         />
       </div>
 
-      <SlideBody
-        key={idx}
-        slide={s}
-        cours={cours}
-        quizResults={quizResults}
-        onAnswer={(num, res) =>
-          setQuizResults((prev) =>
-            prev[num] !== undefined ? prev : { ...prev, [num]: res }
-          )
-        }
-        clients={clients}
-        progClient={progClient}
-        setProgClient={setProgClient}
-      />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={idx}
+          initial={reduce ? false : { opacity: 0, x: dir * 28 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, x: dir * -28 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          <SlideBody
+            slide={s}
+            cours={cours}
+            quizResults={quizResults}
+            onAnswer={(num, res) =>
+              setQuizResults((prev) =>
+                prev[num] !== undefined ? prev : { ...prev, [num]: res }
+              )
+            }
+            clients={clients}
+            progClient={progClient}
+            setProgClient={setProgClient}
+          />
+        </motion.div>
+      </AnimatePresence>
 
       <div className="mt-4 flex gap-2.5">
         {idx > 0 && (
           <Button
             variant="outline"
             className="h-12 flex-1 text-base"
-            onClick={() => {
-              setIdx(idx - 1)
-              scrollTop()
-            }}
+            onClick={() => goTo(idx - 1, -1)}
           >
             Précédent
           </Button>
         )}
         <Button
           className="h-12 flex-1 text-base"
-          onClick={() => {
-            setIdx(idx < total - 1 ? idx + 1 : 0)
-            scrollTop()
-          }}
+          onClick={() =>
+            idx < total - 1 ? goTo(idx + 1, 1) : goTo(0, -1)
+          }
         >
           {idx === total - 1 ? "Revenir au début" : "Suivant"}
         </Button>
@@ -346,7 +360,7 @@ function SlideBody({
 }) {
   if (slide.type === "texte") {
     return (
-      <Card className="slide-card">
+      <Card>
         <CardContent className="flex flex-col gap-3.5">
           <h3 className="text-xl font-bold">{slide.titre}</h3>
           <pre className="pre-wrap text-[17px] leading-relaxed">
@@ -359,7 +373,7 @@ function SlideBody({
 
   if (slide.type === "situation") {
     return (
-      <Card className="slide-card slide-situation">
+      <Card className="slide-situation">
         <CardContent className="flex flex-col gap-3.5">
           <h3 className="text-xl font-bold">Mise en situation</h3>
           <pre className="pre-wrap text-[17px] leading-relaxed">
@@ -375,7 +389,7 @@ function SlideBody({
     const prev = quizResults[slide.num]
     const answered = prev !== undefined
     return (
-      <Card className="slide-card">
+      <Card>
         <CardContent className="flex flex-col gap-3.5">
           <h3 className="text-xl font-bold">Question {slide.num}</h3>
           <p className="text-lg font-semibold">{it.q}</p>
@@ -458,7 +472,7 @@ function SlideBody({
   }
 
   return (
-    <Card className="slide-card">
+    <Card>
       <CardContent className="flex flex-col gap-3.5 text-center">
         <h3 className="text-xl font-bold">Cours terminé, bravo !</h3>
         {totalQ ? (

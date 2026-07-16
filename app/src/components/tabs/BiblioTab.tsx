@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Search } from "lucide-react"
 import { toast } from "sonner"
 
+import { Stagger, StaggerItem } from "@/components/Motion"
 import { ToneBadge } from "@/components/ToneBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -145,32 +146,36 @@ export function BiblioTab() {
             colle chaque contenu ici, ou ajoute tes propres notes.
           </p>
         ) : (
-          list.map((c) => (
-            <Card key={c.id}>
-              <CardContent className="flex flex-col gap-2">
-                <div
-                  className="flex cursor-pointer flex-wrap items-center justify-between gap-2"
-                  onClick={() =>
-                    setOpenId((cur) => (cur === c.id ? null : c.id))
-                  }
-                >
-                  <h3 className="text-base font-bold">{c.titre}</h3>
-                  <ToneBadge tone="termine">{c.categorie}</ToneBadge>
-                </div>
-                {openId === c.id && (
-                  <pre className="pre-wrap text-[15px] leading-relaxed">
-                    {c.corps}
-                  </pre>
-                )}
-                <button
-                  onClick={() => deleteContent(c.id)}
-                  className="text-muted-foreground w-fit cursor-pointer text-sm underline"
-                >
-                  Supprimer
-                </button>
-              </CardContent>
-            </Card>
-          ))
+          <Stagger className="flex flex-col gap-3">
+            {list.map((c) => (
+              <StaggerItem key={c.id}>
+                <Card>
+                  <CardContent className="flex flex-col gap-2">
+                    <div
+                      className="flex cursor-pointer flex-wrap items-center justify-between gap-2"
+                      onClick={() =>
+                        setOpenId((cur) => (cur === c.id ? null : c.id))
+                      }
+                    >
+                      <h3 className="text-base font-bold">{c.titre}</h3>
+                      <ToneBadge tone="termine">{c.categorie}</ToneBadge>
+                    </div>
+                    {openId === c.id && (
+                      <pre className="pre-wrap text-[15px] leading-relaxed">
+                        {c.corps}
+                      </pre>
+                    )}
+                    <button
+                      onClick={() => deleteContent(c.id)}
+                      className="text-muted-foreground w-fit cursor-pointer text-sm underline"
+                    >
+                      Supprimer
+                    </button>
+                  </CardContent>
+                </Card>
+              </StaggerItem>
+            ))}
+          </Stagger>
         )}
       </div>
     </div>

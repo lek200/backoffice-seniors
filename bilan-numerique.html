@@ -221,6 +221,19 @@ const DOMAINS = [
 let flat=[], idx=0, scores=[];
 DOMAINS.forEach((d,di)=>d.questions.forEach((q,qi)=>flat.push({di,qi,q,domain:d.name})));
 
+// Animations fluides via la librairie motion (chargée en <head>).
+// Respecte prefers-reduced-motion et reste sans effet si motion n'est pas prêt.
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function reveal(selector, step){
+  if(prefersReduced || !window.Motion) return;
+  const { animate, stagger } = window.Motion;
+  animate(
+    selector,
+    { opacity:[0,1], transform:['translateY(10px)','translateY(0)'] },
+    { duration:0.3, delay: stagger(step ?? 0.06), easing:'ease-out' }
+  );
+}
+
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -237,6 +250,7 @@ function render(){
   document.getElementById('p-count').textContent=(idx+1)+' / '+flat.length;
   document.getElementById('p-fill').style.width=((idx)/flat.length*100)+'%';
   document.getElementById('btn-back').style.visibility = idx===0 ? 'hidden':'visible';
+  reveal('#s-quiz .answer');
 }
 
 function answer(v){
@@ -273,6 +287,7 @@ function results(){
   document.getElementById('r-cards').innerHTML=html;
   document.getElementById('p-fill').style.width='100%';
   show('s-results');
+  reveal('#r-cards .result-card', 0.08);
 }
 
 function copyReport(){
