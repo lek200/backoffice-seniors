@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { GraduationCap } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,9 +28,21 @@ export function Login() {
   }
 
   return (
-    <section>
-      <h1 className="mt-10 text-2xl font-bold tracking-tight">Back-office</h1>
-      <p className="text-muted-foreground text-sm">
+    <section className="mt-10">
+      <div
+        className="flex size-14 items-center justify-center rounded-2xl text-white"
+        style={{
+          background:
+            "linear-gradient(150deg, #3d6390 0%, var(--blue) 45%, var(--blue-deep) 100%)",
+          boxShadow: "0 10px 24px -12px rgba(51,86,127,0.75)",
+        }}
+      >
+        <GraduationCap className="size-7" />
+      </div>
+      <h1 className="mt-4 text-[28px] font-extrabold tracking-tight">
+        Back-office
+      </h1>
+      <p className="text-muted-foreground">
         Cours d'informatique pour seniors · version 3
       </p>
       <Card className="mt-6">

@@ -4,13 +4,20 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.9rem;
 
   /* Brand palette — senior-friendly warm cream + calm blue (ported from index.html) */
   --ink: #22303c;
   --ink-soft: #5b6b7a;
-  --brand-bg: #fbfaf7;
-  --line: #e4e1d8;
+  --brand-bg: #faf7f1;
+  --line: #ece7dc;
+  --line-legacy: #e4e1d8;
+
+  /* Soft, warm elevation used on cards and interactive tiles */
+  --shadow-card: 0 1px 2px rgba(34, 48, 60, 0.04),
+    0 12px 30px -18px rgba(34, 48, 60, 0.26);
+  --shadow-card-hover: 0 2px 6px rgba(34, 48, 60, 0.05),
+    0 22px 46px -22px rgba(34, 48, 60, 0.32);
   --blue: #33567f;
   --blue-deep: #24405f;
   --honey: #d99a2b;
@@ -20,7 +27,7 @@
   --red-soft: #f4e4e1;
   --red-ink: #8c4a3e;
 
-  --background: #fbfaf7;
+  --background: #faf7f1;
   --foreground: #22303c;
   --card: #ffffff;
   --card-foreground: #22303c;
@@ -130,13 +137,35 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-family:
       "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     /* Senior-friendly base size: comfortably large and readable */
     font-size: 17px;
     line-height: 1.55;
+    /* Warm, subtly worked cream ground (honey glow + cool light) */
+    background:
+      radial-gradient(
+        900px 420px at 50% -8%,
+        #fff6e6 0%,
+        rgba(255, 246, 230, 0) 62%
+      ),
+      radial-gradient(
+        720px 380px at 100% 0%,
+        #eef3f7 0%,
+        rgba(238, 243, 247, 0) 55%
+      ),
+      var(--background);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
+}
+
+/* Soft elevation + hairline border on every card */
+[data-slot="card"] {
+  border-color: var(--line);
+  box-shadow: var(--shadow-card);
+  border-radius: 1.1rem;
 }
 
 /* ============================================================

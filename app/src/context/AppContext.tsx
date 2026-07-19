@@ -9,8 +9,15 @@ import {
 } from "react"
 import { toast } from "sonner"
 
+import { CATALOG } from "@/lib/catalog"
 import { sb } from "@/lib/supabase"
 import type { Client, Contenu, Cours } from "@/lib/types"
+
+/** Built-in catalog first, then any Supabase courses not already covered. */
+function mergeCatalog(dbCours: Cours[]): Cours[] {
+  const ids = new Set(CATALOG.map((c) => c.id))
+  return [...CATALOG, ...dbCours.filter((c) => !ids.has(c.id))]
+}
 
 export type TabName = "clients" | "bilan" | "cours" | "biblio" | "diplome"
 
@@ -19,7 +26,7 @@ export interface DiplomaPrefill {
   module: string
 }
 
-interface AppContextValue {
+export interface AppContextValue {
   clients: Client[]
   cours: Cours[]
   contenus: Contenu[]
@@ -41,11 +48,13 @@ interface AppContextValue {
   clearDiplomaPrefill: () => void
 }
 
-const AppContext = createContext<AppContextValue | null>(null)
+// Exported so a mock provider (e.g. the preview harness) can supply a value.
+// eslint-disable-next-line react-refresh/only-export-components
+export const AppContext = createContext<AppContextValue | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<Client[]>([])
-  const [cours, setCours] = useState<Cours[]>([])
+  const [cours, setCours] = useState<Cours[]>(CATALOG)
   const [contenus, setContenus] = useState<Contenu[]>([])
   const [activeTab, setActiveTab] = useState<TabName>("clients")
   const [pendingCourseId, setPendingCourseId] = useState<string | null>(null)
@@ -71,7 +80,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .select("*")
       .order("domaine")
       .order("niveau")
-    if (!error) setCours((data as Cours[]) || [])
+    setCours(mergeCatalog(error ? [] : ((data as Cours[]) || [])))
   }, [])
 
   const loadContenus = useCallback(async () => {

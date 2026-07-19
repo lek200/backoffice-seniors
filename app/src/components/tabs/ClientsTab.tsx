@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Search } from "lucide-react"
+import { ChevronRight, Search } from "lucide-react"
 import { toast } from "sonner"
 
 import { Stagger, StaggerItem } from "@/components/Motion"
@@ -24,8 +24,39 @@ import type { Bilan, FeuilleRoute, Progression, Statut } from "@/lib/types"
 
 const STATUTS: Statut[] = ["prospect", "actif", "termine"]
 
+const STATUT_COLOR: Record<Statut, string> = {
+  actif: "#4e7a5a",
+  prospect: "#8c4a3e",
+  termine: "#33567f",
+}
+
 function frDate(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR")
+}
+
+function initials(prenom: string, nom: string | null) {
+  return `${prenom.charAt(0)}${(nom ?? "").charAt(0)}`.toUpperCase() || "?"
+}
+
+function StatCard({
+  n,
+  label,
+  color,
+}: {
+  n: number
+  label: string
+  color: string
+}) {
+  return (
+    <div className="bg-card rounded-2xl border border-[color:var(--line)] px-4 py-3.5 shadow-[var(--shadow-card)]">
+      <div className="text-[26px] font-extrabold tracking-tight" style={{ color }}>
+        {n}
+      </div>
+      <div className="text-muted-foreground text-[12.5px] font-semibold">
+        {label}
+      </div>
+    </div>
+  )
 }
 
 export function ClientsTab() {
@@ -43,7 +74,7 @@ export function ClientsTab() {
 // List view
 // ------------------------------------------------------------
 function ClientsList({ onOpen }: { onOpen: (id: string) => void }) {
-  const { clients, loadClients } = useApp()
+  const { clients, cours, loadClients } = useApp()
   const [showForm, setShowForm] = useState(false)
   const [query, setQuery] = useState("")
 
@@ -88,8 +119,16 @@ function ClientsList({ onOpen }: { onOpen: (id: string) => void }) {
       )
     : clients
 
+  const nbActifs = clients.filter((c) => c.statut === "actif").length
+
   return (
     <div>
+      <div className="mb-5 grid grid-cols-3 gap-3">
+        <StatCard n={clients.length} label="Clients suivis" color="var(--blue)" />
+        <StatCard n={nbActifs} label="Parcours actifs" color="var(--green)" />
+        <StatCard n={cours.length} label="Cours disponibles" color="#b47d1e" />
+      </div>
+
       <Button
         variant="outline"
         className="mb-4 h-12 w-full text-base"
@@ -158,27 +197,37 @@ function ClientsList({ onOpen }: { onOpen: (id: string) => void }) {
         </p>
       ) : (
         <Stagger className="flex flex-col gap-3">
-          {list.map((c) => (
-            <StaggerItem key={c.id}>
-              <Card
-                className="hover:border-primary cursor-pointer transition-colors"
-                onClick={() => onOpen(c.id)}
-              >
-                <CardContent className="flex flex-col gap-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="text-base font-bold">
-                      {c.prenom} {c.nom}
-                    </h3>
+          {list.map((c) => {
+            const color = STATUT_COLOR[c.statut]
+            return (
+              <StaggerItem key={c.id}>
+                <Card
+                  className="hover:border-primary cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] motion-reduce:transform-none"
+                  onClick={() => onOpen(c.id)}
+                >
+                  <CardContent className="flex items-center gap-4">
+                    <div
+                      className="flex size-12 shrink-0 items-center justify-center rounded-2xl text-[17px] font-extrabold"
+                      style={{ background: `${color}22`, color }}
+                    >
+                      {initials(c.prenom, c.nom)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-[16.5px] font-bold">
+                        {c.prenom} {c.nom}
+                      </h3>
+                      <p className="text-muted-foreground truncate text-sm">
+                        {c.appareil || "Appareil non renseigné"}
+                        {c.telephone ? ` · ${c.telephone}` : ""}
+                      </p>
+                    </div>
                     <ToneBadge tone={c.statut}>{c.statut}</ToneBadge>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    {c.appareil || "Appareil non renseigné"}
-                    {c.telephone ? ` · ${c.telephone}` : ""}
-                  </p>
-                </CardContent>
-              </Card>
-            </StaggerItem>
-          ))}
+                    <ChevronRight className="size-5 shrink-0 text-[#c7cdd4]" />
+                  </CardContent>
+                </Card>
+              </StaggerItem>
+            )
+          })}
         </Stagger>
       )}
     </div>
@@ -413,7 +462,7 @@ function ClientDetail({ id, onBack }: { id: string; onBack: () => void }) {
               {reco.map((r) => (
                 <Card
                   key={r!.cr.id}
-                  className="hover:border-primary mb-3 cursor-pointer transition-colors"
+                  className="hover:border-primary mb-3 cursor-pointer transition-all hover:-translate-y-0.5 motion-reduce:transform-none"
                   onClick={() => openCourse(r!.cr.id)}
                 >
                   <CardContent className="flex flex-col gap-1">

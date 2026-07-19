@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { Search } from "lucide-react"
+import { ChevronRight, Search } from "lucide-react"
 import { toast } from "sonner"
 
 import { Stagger, StaggerItem } from "@/components/Motion"
@@ -17,7 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useApp } from "@/context/AppContext"
-import { NIVEAUX, NIVEAU_CLS, tileColor } from "@/lib/domains"
+import { NIVEAUX, NIVEAU_CLS } from "@/lib/domains"
+import { domainMeta } from "@/lib/domainMeta"
 import { buildSlides, type Slide } from "@/lib/slides"
 import { CONFIG } from "@/lib/config"
 import { sb } from "@/lib/supabase"
@@ -68,9 +69,14 @@ function CoursList({ onOpen }: { onOpen: (id: string) => void }) {
     return l
   }, [cours, domaine, query])
 
+  const nbDomaines = domaines.length
+
   return (
     <div>
-      <h2 className="mb-3 text-xl font-bold">Cours</h2>
+      <h2 className="text-[22px] font-bold tracking-tight">Catalogue de cours</h2>
+      <p className="text-muted-foreground mb-4 text-[15px]">
+        {cours.length} cours · {nbDomaines} domaines · 3 niveaux
+      </p>
       <div className="relative mb-3">
         <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
@@ -112,16 +118,29 @@ function CoursList({ onOpen }: { onOpen: (id: string) => void }) {
           </p>
         ) : (
           <Stagger className="flex flex-col gap-3">
-            {list.map((c) => (
-              <StaggerItem key={c.id}>
-                <Card
-                  className="hover:border-primary cursor-pointer transition-colors"
-                  onClick={() => onOpen(c.id)}
-                >
-                  <CardContent className="flex flex-col gap-1">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-base font-bold">{c.titre}</h3>
-                      <div className="flex items-center gap-1.5">
+            {list.map((c) => {
+              const meta = domainMeta(c.domaine)
+              const Icon = meta.icon
+              return (
+                <StaggerItem key={c.id}>
+                  <Card
+                    className="hover:border-primary cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] motion-reduce:transform-none"
+                    onClick={() => onOpen(c.id)}
+                  >
+                    <CardContent className="flex items-center gap-4">
+                      <div
+                        className="flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-[inset_0_-2px_6px_rgba(0,0,0,0.12)]"
+                        style={{ background: meta.gradient }}
+                      >
+                        <Icon className="size-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-[16.5px] font-bold">{c.titre}</h3>
+                        <p className="text-muted-foreground truncate text-sm">
+                          {c.domaine}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5">
                         {c.statut !== "publie" && (
                           <ToneBadge tone="prospect">À générer</ToneBadge>
                         )}
@@ -129,12 +148,12 @@ function CoursList({ onOpen }: { onOpen: (id: string) => void }) {
                           {NIVEAUX[c.niveau]}
                         </ToneBadge>
                       </div>
-                    </div>
-                    <p className="text-muted-foreground text-sm">{c.domaine}</p>
-                  </CardContent>
-                </Card>
-              </StaggerItem>
-            ))}
+                      <ChevronRight className="size-5 shrink-0 text-[#c7cdd4]" />
+                    </CardContent>
+                  </Card>
+                </StaggerItem>
+              )
+            })}
           </Stagger>
         )}
       </div>
@@ -220,17 +239,18 @@ function CoursPlayer({ cours, onBack }: { cours: Cours; onBack: () => void }) {
     }
   }
 
-  const tile = tileColor(cours.domaine)
+  const meta = domainMeta(cours.domaine)
+  const HeaderIcon = meta.icon
 
   const Header = (
     <>
       <BackLink onClick={onBack} />
       <div className="my-2 flex items-center gap-3.5">
         <div
-          className="flex size-[54px] shrink-0 items-center justify-center rounded-[14px] text-2xl font-bold text-white"
-          style={{ background: tile }}
+          className="flex size-[54px] shrink-0 items-center justify-center rounded-2xl text-white shadow-[inset_0_-2px_6px_rgba(0,0,0,0.12)]"
+          style={{ background: meta.gradient }}
         >
-          {cours.domaine.charAt(0)}
+          <HeaderIcon className="size-7" />
         </div>
         <div>
           <span
