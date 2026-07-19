@@ -1,0 +1,421 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.9rem;
+
+  /* Brand palette — senior-friendly warm cream + calm blue (ported from index.html) */
+  --ink: #22303c;
+  --ink-soft: #5b6b7a;
+  --brand-bg: #faf7f1;
+  --line: #ece7dc;
+  --line-legacy: #e4e1d8;
+
+  /* Soft, warm elevation used on cards and interactive tiles */
+  --shadow-card: 0 1px 2px rgba(34, 48, 60, 0.04),
+    0 12px 30px -18px rgba(34, 48, 60, 0.26);
+  --shadow-card-hover: 0 2px 6px rgba(34, 48, 60, 0.05),
+    0 22px 46px -22px rgba(34, 48, 60, 0.32);
+  --blue: #33567f;
+  --blue-deep: #24405f;
+  --honey: #d99a2b;
+  --honey-soft: #f7ebd3;
+  --green: #4e7a5a;
+  --green-soft: #e6f0e8;
+  --red-soft: #f4e4e1;
+  --red-ink: #8c4a3e;
+
+  --background: #faf7f1;
+  --foreground: #22303c;
+  --card: #ffffff;
+  --card-foreground: #22303c;
+  --popover: #ffffff;
+  --popover-foreground: #22303c;
+  --primary: #33567f;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f0ea;
+  --secondary-foreground: #24405f;
+  --muted: #f2f0ea;
+  --muted-foreground: #5b6b7a;
+  --accent: #e9eef5;
+  --accent-foreground: #24405f;
+  --destructive: #8c4a3e;
+  --border: #e4e1d8;
+  --input: #e4e1d8;
+  --ring: #d99a2b;
+  --chart-1: #33567f;
+  --chart-2: #4e7a5a;
+  --chart-3: #8a6112;
+  --chart-4: #8c4a3e;
+  --chart-5: #5b4a7f;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #22303c;
+  --sidebar-primary: #33567f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e9eef5;
+  --sidebar-accent-foreground: #24405f;
+  --sidebar-border: #e4e1d8;
+  --sidebar-ring: #d99a2b;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply text-foreground;
+    font-family:
+      "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* Senior-friendly base size: comfortably large and readable */
+    font-size: 17px;
+    line-height: 1.55;
+    /* Warm, subtly worked cream ground (honey glow + cool light) */
+    background:
+      radial-gradient(
+        900px 420px at 50% -8%,
+        #fff6e6 0%,
+        rgba(255, 246, 230, 0) 62%
+      ),
+      radial-gradient(
+        720px 380px at 100% 0%,
+        #eef3f7 0%,
+        rgba(238, 243, 247, 0) 55%
+      ),
+      var(--background);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+/* Soft elevation + hairline border on every card */
+[data-slot="card"] {
+  border-color: var(--line);
+  box-shadow: var(--shadow-card);
+  border-radius: 1.1rem;
+}
+
+/* ============================================================
+   Brand extras ported from the original static site.
+   ============================================================ */
+
+/* Preserve line breaks in course/roadmap text blocks */
+.pre-wrap {
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+/* Status + level badges keyed by the original class names */
+.lvl-prospect {
+  background: var(--honey-soft);
+  color: #8a6112;
+}
+.lvl-actif {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.lvl-termine {
+  background: #e9eef5;
+  color: var(--blue);
+}
+.lvl-decouvrir {
+  background: var(--red-soft);
+  color: var(--red-ink);
+}
+.lvl-progres {
+  background: var(--honey-soft);
+  color: #8a6112;
+}
+.lvl-fort {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+/* Bilan quiz answer dots */
+.answer-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid var(--line);
+}
+.answer-dot.a0 {
+  background: var(--red-soft);
+  border-color: #d9a79f;
+}
+.answer-dot.a1 {
+  background: var(--honey-soft);
+  border-color: var(--honey);
+}
+.answer-dot.a2 {
+  background: var(--green-soft);
+  border-color: var(--green);
+}
+
+/* Course slide card */
+.slide-card {
+  animation: fadeSlide 0.3s ease;
+}
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.slide-situation {
+  border-left: 4px solid var(--honey);
+}
+
+/* ============================================================
+   Diplôme prestige (ported verbatim from index.html)
+   ============================================================ */
+.diplome {
+  background: #fffef9;
+  border: 5px double #2a3a55;
+  padding: 52px 44px;
+  text-align: center;
+  margin-top: 20px;
+  position: relative;
+  font-family: Georgia, "Times New Roman", serif;
+  color: #1e2a3d;
+}
+.diplome::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1.5px solid #b8963e;
+  pointer-events: none;
+}
+.diplome .d-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #2a3a55;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.diplome .d-org {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8a7642;
+  margin-bottom: 26px;
+}
+.diplome .d-title {
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+  font-variant: small-caps;
+}
+.diplome .d-rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  margin: 14px auto 22px;
+  max-width: 340px;
+}
+.diplome .d-rule::before,
+.diplome .d-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #b8963e;
+}
+.diplome .d-rule span {
+  color: #b8963e;
+  font-size: 13px;
+}
+.diplome .d-sub {
+  color: #5b6b7a;
+  font-size: 15px;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.diplome .d-name {
+  font-size: 38px;
+  font-weight: 400;
+  color: #1e2a3d;
+  margin: 12px 0 4px;
+  font-style: italic;
+}
+.diplome .d-name-line {
+  width: 260px;
+  height: 1px;
+  background: #2a3a55;
+  margin: 0 auto 24px;
+}
+.diplome .d-module {
+  font-size: 17px;
+  margin: 10px 0 8px;
+  line-height: 1.6;
+}
+.diplome .d-module strong {
+  font-variant: small-caps;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+}
+.diplome .d-mention {
+  font-size: 15px;
+  margin: 16px 0 6px;
+}
+.diplome .d-mention strong {
+  color: #8a7642;
+  font-variant: small-caps;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+.diplome .d-lieu {
+  font-size: 14px;
+  font-style: italic;
+  color: #5b6b7a;
+  margin-top: 26px;
+}
+.diplome .d-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 34px;
+  font-size: 13px;
+  color: #5b6b7a;
+}
+.diplome .d-sign {
+  border-top: 1px solid #2a3a55;
+  padding-top: 8px;
+  min-width: 170px;
+  font-style: italic;
+}
+.diplome .d-seal {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  border: 2px solid #b8963e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #8a7642;
+  position: relative;
+  flex-shrink: 0;
+  background: #fdf8ec;
+}
+.diplome .d-seal::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid #b8963e;
+  border-radius: 50%;
+}
+.diplome .d-seal .seal-star {
+  font-size: 16px;
+  line-height: 1;
+}
+.diplome .d-seal .seal-txt {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  text-align: center;
+  line-height: 1.5;
+}
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .diplome,
+  .diplome * {
+    visibility: visible;
+  }
+  .diplome {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}

@@ -6,6 +6,11 @@
 <title>Back-office — Cours informatique seniors</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script type="module">
+  // Motion animation library (https://motion.dev) — exposed globally for inline scripts
+  import * as Motion from "https://cdn.jsdelivr.net/npm/motion@latest/+esm";
+  window.Motion = Motion;
+</script>
 <style>
   :root{
     --ink:#22303C; --ink-soft:#5B6B7A; --bg:#FBFAF7; --card:#FFFFFF;
